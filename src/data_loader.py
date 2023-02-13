@@ -1,5 +1,8 @@
 from typing import *
+import os
+import torch
 from torch_geometric.data import Dataset, Data
+from torch_geometric.datasets import MoleculeNet
 
 class MoleculeDataset(Dataset):
     def __init__(self, root: str = None, name: Literal["ESOL", "FreeSolv", "Lipo", "PCBA", "MUV", "HIV", "BACE", "BBBP", "Tox21", "ToxCast", "SIDER", "ClinTox"] = None, filepath: str = None, smiles_colname: str = 'smiles', label_colname: str = 'label', compound_name_colname: str = 'compound_name', filetype: Literal['smiles', 'compound_name'] = None, smiles: Union[str, List[str]] = None, compound_names: Union[str, List[str]] = None):
@@ -61,6 +64,51 @@ class MoleculeDataset(Dataset):
             return "compound_names"
         else:
             return "unknown"
+        
+    def __load_data(self) -> None:
+        if self.root is not None and self.name is not None:
+            try:
+                print("Trying to load dataset from MoleculeNet")
+                self.data_list = list(MoleculeNet(self.root, self.name))
+                print("Dataset loaded from MoleculeNet")
+            except:
+                print("Dataset not found in MoleculeNet")
+                dirpath = os.path.join(self.root, self.name, "processed")
+                os.makedirs(dirpath, exist_ok=True)
+                data_filepath = os.path.join(dirpath, "data.pt")
+                if os.path.exists(data_filepath):
+                    print("Loading dataset from local cache")
+                    self.data_list = torch.load(data_filepath, weights_only=False)
+                elif self.filepath is not None:
+                    print("Loading data from filepath")
+                    data_list, has_labelled_data = self.__load_data_from_filepath()
+                    self.data_list = data_list
+                    if has_labelled_data:
+                        print("Saving data to local cache")
+                        torch.save(self.data_list, data_filepath)
+                else:
+                    raise ValueError(
+                        "At least one of root and name, or filepath must be provided")
+        elif self.filepath is not None:
+            print("Loading dataset from filepath")
+            data_list, has_labelled_data = self.__load_data_from_filepath()
+            self.data_list = data_list
+        elif self.smiles is not None:
+            self.data_list = self.__load_data_from_smiles(self.smiles)
+        elif self.compound_names is not None:
+            if isinstance(self.compound_names, str):
+                data = self.__load_from_compound_name(self.compound_names)
+                if data is None:
+                    self.data_list = []
+                else:
+                    self.data_list = [data]
+            elif isinstance(self.compound_names, list):
+                self.data_list = self.__load_from_compound_names(self.compound_names)
+            else:
+                raise ValueError("Invalid compound names type. Expected a string or list of strings.")
+        else:
+            raise ValueError(
+                "At least one of root and name, or filepath must be provided")
 
     @classmethod
     def from_moleculenet(cls, root: str, name: str) -> 'MoleculeDataset':
