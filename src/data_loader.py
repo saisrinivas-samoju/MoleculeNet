@@ -35,26 +35,26 @@ class MoleculeDataset(Dataset):
         pass
 
     @classmethod
-    def from_moleculenet(cls):
+    def from_moleculenet(cls, root: str, name: str) -> 'MoleculeDataset':
         """Factory method to create MoleculeDataset from MoleculeNet dataset."""
-        pass
+        return cls(root=root, name=name)
 
     @classmethod
-    def from_smiles_file(cls):
+    def from_smiles_file(cls, filepath: str, smiles_colname: str = 'smiles', label_colname: str = 'label') -> 'MoleculeDataset':
         """Factory method to create MoleculeDataset from a file containing SMILES strings."""
-        pass
+        return cls(filepath=filepath, smiles_colname=smiles_colname, label_colname=label_colname, filetype='smiles')
 
     @classmethod
-    def from_compound_name_file(cls):
+    def from_compound_name_file(cls, filepath: str, compound_name_colname: str = 'compound_name', label_colname: str = 'label') -> 'MoleculeDataset':
         """Factory method to create MoleculeDataset from a file containing compound names."""
-        pass
+        return cls(filepath=filepath, compound_name_colname=compound_name_colname, label_colname=label_colname, filetype='compound_name')
 
     @classmethod
-    def from_smiles(cls):
+    def from_smiles(cls, smiles: Union[str, List[str]]) -> 'MoleculeDataset':
         """Factory method to create MoleculeDataset directly from SMILES string(s)."""
-        pass
+        return cls(smiles=smiles)
 
     @classmethod
-    def from_compound_names(cls):
+    def from_compound_names(cls, compound_names: Union[str, List[str]]) -> 'MoleculeDataset':
         """Factory method to create MoleculeDataset directly from compound name(s)."""
-        pass
+        return cls(compound_names=compound_names)
