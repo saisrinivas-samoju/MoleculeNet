@@ -32,22 +32,35 @@ class MoleculeDataset(Dataset):
     @property
     def num_nodes(self) -> int:
         """Number of nodes/molecules in the dataset."""
-        pass
+        return len(self.data_list)
     
     @property
-    def feature_names(self):
+    def feature_names(self) -> List[str]:
         """Names of the node features."""
-        pass
+        return ["atomic_num", "chiral_tag", "total_degree", "formal_charge", "total_num_h", "radical_electrons", "hybridization", 
+                "is_aromatic", "in_ring"]
 
     @property
-    def has_labels(self):
+    def has_labels(self) -> bool:
         """Check if the dataset has labels."""
-        pass
+        return all(hasattr(data, 'y') and data.y is not None for data in self.data_list)
 
     @property
-    def data_source_type(self):
+    def data_source_type(self) -> str:
         """The type of data source used for this dataset."""
-        pass
+        if self.root is not None and self.name is not None:
+            return "moleculenet"
+        elif self.filepath is not None:
+            if self.is_smiles_file:
+                return "smiles_file"
+            else:
+                return "compound_name_file"
+        elif self.smiles is not None:
+            return "smiles"
+        elif self.compound_names is not None:
+            return "compound_names"
+        else:
+            return "unknown"
 
     @classmethod
     def from_moleculenet(cls, root: str, name: str) -> 'MoleculeDataset':
