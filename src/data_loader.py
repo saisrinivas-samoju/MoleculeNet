@@ -1,6 +1,10 @@
 from typing import *
 import os
+from tqdm import tqdm
+import pandas as pd
+import cirpy
 import torch
+from torch_geometric.utils import from_smiles
 from torch_geometric.data import Dataset, Data
 from torch_geometric.datasets import MoleculeNet
 
@@ -109,6 +113,116 @@ class MoleculeDataset(Dataset):
         else:
             raise ValueError(
                 "At least one of root and name, or filepath must be provided")
+            
+    def __load_data_from_filepath(self) -> Tuple[List[Data], bool]:
+        if self.is_smiles_file:
+            print("Loading dataset from smiles file")
+            data_list, has_labelled_data = self.__load_data_from_smiles_file(
+                self.filepath)
+        elif self.is_compound_name_file:
+            print("Loading dataset from compound name file")
+            data_list, has_labelled_data = self.__load_from_compound_name_file(
+                self.filepath)
+        else:
+            raise ValueError("Invalid file extension. Expected .csv or .txt.")
+        return data_list, has_labelled_data
+    
+    def __load_data_from_smiles_file(self, filepath: str) -> Tuple[List[Data], bool]:
+        if filepath.endswith('.csv'):
+            df = pd.read_csv(filepath)
+            smiles_list = df[self.smiles_colname].tolist()
+            # label_list = df[self.label_colname].tolist()
+            if isinstance(self.label_colname, str):
+                label_list = df[self.label_colname].tolist()
+                has_labelled_data = True
+            elif isinstance(self.label_colname, list):
+                label_list = df[self.label_colname].values.tolist()
+                has_labelled_data = True
+            elif self.label_colname is None:
+                has_labelled_data = False
+            else:
+                raise ValueError("Invalid label column name. Expected a string or list of strings or None.")
+        elif filepath.endswith('.txt'):
+            with open(filepath, 'r') as file:
+                smiles_list = file.readlines()
+                label_list = [None] * len(smiles_list)
+                has_labelled_data = False
+        else:
+            raise ValueError("Invalid file extension. Expected .csv or .txt.")
+        data_list = self.__load_data_from_smiles(smiles_list, label_list)
+        return data_list, has_labelled_data
+    
+    def __load_from_compound_name_file(self, filepath: str) -> Tuple[List[Data], bool]:
+        has_labelled_data = False
+        if filepath.endswith('.csv'):
+            df = pd.read_csv(filepath)
+            compound_names = df[self.compound_name_colname].tolist()
+            smiles_list = self.__get_smiles_from_compound_names(compound_names)
+            if self.label_colname is not None:
+                label_list = df[self.label_colname].tolist()
+                label_list = [label for i, label in enumerate(label_list) if smiles_list[i] is not None]
+                smiles_list = [smiles for smiles in smiles_list if smiles is not None]
+                data_list = self.__load_data_from_smiles(smiles_list, label_list)
+                has_labelled_data = True
+            else:
+                smiles_list = [smiles for smiles in smiles_list if smiles is not None]
+                data_list = self.__load_data_from_smiles(smiles_list)
+            return data_list, has_labelled_data
+        elif filepath.endswith('.txt'):
+            with open(filepath, 'r') as file:
+                compound_names = file.readlines()
+                data_list = self.__load_from_compound_names(compound_names)
+                return data_list, has_labelled_data
+        else:
+            raise ValueError("Invalid file extension. Expected .csv or .txt.")
+        
+    def __load_from_compound_names(self, compound_names: List[str], labels: Union[int, float, List[int], List[float]]=None) -> List[Union[Data, None]]:
+        smiles_list = [self.__get_smiles_from_compound_name(name) for name in compound_names]
+        if labels is None:
+            smiles_list = [smiles for smiles in smiles_list if smiles is not None]
+            labels = [None] * len(smiles_list)
+        else:
+            labels = [label for i, label in enumerate(labels) if smiles_list[i] is not None]
+            smiles_list = [smiles for smiles in smiles_list if smiles is not None]
+        data_list = self.__load_data_from_smiles(smiles_list, labels)
+        return data_list
+        
+    def __load_from_compound_name(self, compound_name: str, label: Union[int, float]=None) -> Union[Data, None]:
+        smiles = self.__get_smiles_from_compound_name(compound_name)
+        if smiles is None:
+            return None
+        return self.__load_data_from_smiles(smiles, label)
+        
+    def __get_smiles_from_compound_names(self, compound_names: List[str]) -> List[Union[str, None]]:
+        return [self.__get_smiles_from_compound_name(name) for name in tqdm(compound_names, desc="Resolving smiles to compound names")]
+    
+    def __get_smiles_from_compound_name(self, compound_name: str) -> Union[str, None]:
+        smiles = cirpy.resolve(input=compound_name, representation="smiles")
+        return smiles
+        
+    def __load_data_from_smiles(self, smiles: Union[str, List[str]], label: Union[int, float, List[int], List[float], None] = None) -> List[Data]:
+        if isinstance(smiles, str):
+            data_list = [self.__load_data_from_smiles_str(smiles, label)]
+        elif isinstance(smiles, list):
+            if label is None:
+                label = [None] * len(smiles)
+            
+            data_list = [self.__load_data_from_smiles_str(s, l) for s, l in tqdm(zip(smiles, label), desc="Loading smiles")]
+        else:
+            raise ValueError(
+                "Invalid input type. Expected a string or list of strings.")
+        data_list = [data for data in data_list if data is not None]
+        return data_list
+    
+    def __load_data_from_smiles_str(self, smiles: str, label: Union[int, float, None] = None) -> Union[Data, None]:
+        """Convert SMILES to an RDKit molecule object"""
+        try:
+            data = from_smiles(smiles)
+            if label is not None:
+                data.y = label
+        except:
+            return None
+        return data
 
     @classmethod
     def from_moleculenet(cls, root: str, name: str) -> 'MoleculeDataset':
