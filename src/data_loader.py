@@ -24,10 +24,10 @@ class MoleculeDataset(Dataset):
         self.__load_data()
     
     def __len__(self) -> int:
-        pass
-    
-    def __getitem__(self):
-        pass
+        return len(self.data_list)
+
+    def __getitem__(self, idx: int) -> Data:
+        return self.data_list[idx]
     
     @property
     def num_nodes(self) -> int:
