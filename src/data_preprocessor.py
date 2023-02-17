@@ -1,4 +1,5 @@
 from typing import *
+import numpy as np
 from src.data_loader import MoleculeDataset
 
 class Preprocessor:
@@ -21,7 +22,13 @@ class Preprocessor:
             self.outlier_threshold = outlier_threshold
     
     def remove_outliers(self):
-        pass
+        label_list = [data.y for data in self.dataset]
+        mean = np.mean(label_list)
+        std = np.std(label_list)
+        lower_bound = mean - self.outlier_threshold * std
+        upper_bound = mean + self.outlier_threshold * std
+        filtered_dataset = [data for data in self.dataset if data.y > lower_bound and data.y < upper_bound]
+        return filtered_dataset
     
     def get_balance_data(self):
         pass
