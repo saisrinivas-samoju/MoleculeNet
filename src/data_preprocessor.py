@@ -64,7 +64,24 @@ class Preprocessor:
         return res_dataset
     
     def preprocess(self): # main item
-        pass
+        if self.task == "regression":
+            if self.remove_outliers:
+                processed_dataset = self.remove_outliers()
+            else:
+                return self.dataset
+        elif self.task == "classification":
+            if self.balance_data:
+                processed_dataset = self.get_balance_data()
+            else:
+                return self.dataset
+                
+        elif self.task == "multi-label classification": # TODO: Add multi-label classification preprocessing
+            return self.dataset
+        else:
+            raise ValueError(f"Invalid task: {self.task} | task must be either 'regression' or 'classification'")
+        
+        self.dataset.data_list = processed_dataset
+        return self.dataset
     
     def __call__(self):
         return self.preprocess()
