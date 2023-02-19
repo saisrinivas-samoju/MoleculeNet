@@ -1,5 +1,6 @@
 # Let's develop the data spliting based on strategy design
 from abc import ABC, abstractmethod
+from torch_geometric.loader import DataLoader
 
 # Base Strategy Class
 class DataSplitStrategy(ABC):
@@ -18,3 +19,16 @@ class DataSplitStrategy(ABC):
     def split(self, dataset, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15, batch_size=32):
         """Split a dataset into train, validation and test sets"""
         pass
+    
+class SimpleSplit(DataSplitStrategy):
+    def split(self, dataset, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15, batch_size=32):
+        train_ratio, val_ratio, test_ratio = self.standardize_ratios(train_ratio, val_ratio, test_ratio)
+        train_dataset = dataset[:int(train_ratio * len(dataset))]
+        val_dataset = dataset[int(train_ratio * len(dataset)):int((train_ratio + val_ratio) * len(dataset))]
+        test_dataset = dataset[int((train_ratio + val_ratio) * len(dataset)):]
+        
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
+        val_loader = DataLoader(val_dataset, batch_size=batch_size)
+        test_loader = DataLoader(test_dataset, batch_size=batch_size)
+        
+        return train_loader, val_loader, test_loader
