@@ -66,3 +66,16 @@ class ShuffleSplit(DataSplitStrategy):
         test_loader = DataLoader(test_dataset, batch_size=batch_size, drop_last=True)
         
         return train_loader, val_loader, test_loader
+    
+# Context class that uses a strategy
+class DataSplitter:
+    def __init__(self, strategy=None):
+        self.strategy = strategy or SimpleSplit()
+    
+    def set_strategy(self, strategy):
+        self.strategy = strategy
+    
+    def split_data(self, dataset, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15, batch_size=32, random_seed=42):
+        if isinstance(self.strategy, ShuffleSplit):
+            return self.strategy.split(dataset, train_ratio, val_ratio, test_ratio, batch_size, random_seed)
+        return self.strategy.split(dataset, train_ratio, val_ratio, test_ratio, batch_size)
