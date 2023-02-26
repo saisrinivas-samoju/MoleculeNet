@@ -94,5 +94,34 @@ class MoleculeNetClassifier(Module):
         self.out = Linear(hidden_dim * 2, num_classes)
         self.num_classes = num_classes
     
-    def forward(self):
-        pass
+    def forward(self, x, edge_index, batch):
+        # Layer 1
+        x = self.conv1(x, edge_index)
+        x = self.bn1(x)
+        x = F.relu(x)
+        x = self.dropout(x)
+        
+        # Layer 2
+        x = self.conv2(x, edge_index)
+        x = self.bn2(x)
+        x = F.relu(x)
+        x = self.dropout(x)
+        
+        # Layer 3
+        x = self.conv3(x, edge_index)
+        x = self.bn3(x)
+        x = F.relu(x)
+        
+        # Global pooling
+        x_mean = global_mean_pool(x, batch)
+        x_max = global_max_pool(x, batch)
+        x = torch.cat([x_mean, x_max], dim=1)
+        
+        # Output
+        x = self.out(x)
+        
+        # Apply appropriate activation for classification
+        if self.num_classes == 2:
+            return torch.sigmoid(x)
+        else:
+            return F.log_softmax(x, dim=1)
