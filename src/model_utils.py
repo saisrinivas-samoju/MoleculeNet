@@ -3,7 +3,7 @@ from typing import *
 import torch
 from src.model_architecture import MoleculeNetRegressor, MoleculeNetClassifier
 
-def save_model(model, optimizer, model_info, metrics, model_path, model_name, task_type: Literal['classification', 'regression']) -> None:
+def save_model(model, optimizer, model_info, metrics, model_path, model_name) -> None:
     """
     Save model with metadata
     
@@ -22,7 +22,21 @@ def save_model(model, optimizer, model_info, metrics, model_path, model_name, ta
     model_name : str
         Name of the model file
     """
-    pass
+    # Create directory if it doesn't exist
+    os.makedirs(model_path, exist_ok=True)
+    
+    # Create full path
+    model_file = os.path.join(model_path, f'{model_name}_full.pt')
+    
+    # Save model with metadata
+    torch.save({
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'model_info': model_info,
+        'metrics': metrics
+    }, model_file)
+    
+    print(f"Model saved to {model_file}")
 
 def load_model(model_path, device, task_type: Literal['classification', 'regression']) -> tuple:
     """
