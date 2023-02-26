@@ -58,4 +58,44 @@ def load_model(model_path, device, task_type: Literal['classification', 'regress
     metrics : dict
         Dictionary containing evaluation metrics
     """
-    pass
+    # Load checkpoint
+    checkpoint = torch.load(model_path, map_location=device)
+    
+    # Extract model info
+    model_info = checkpoint['model_info']
+    
+    if task_type=='regression':
+        # Create model with same architecture
+        model = MoleculeNetRegressor(
+            num_features=model_info['num_features'],
+            hidden_dim=model_info['hidden_dim'],
+            layer_type=model_info['layer_type'],
+            dropout_rate=model_info['dropout_rate']
+        )
+    elif task_type=='classification':
+        # Create model with same architecture
+        model = MoleculeNetClassifier(
+            num_features=model_info['num_features'],
+            hidden_dim=model_info['hidden_dim'],
+            layer_type=model_info['layer_type'],
+            dropout_rate=model_info['dropout_rate'],
+            num_classes=model_info.get('num_classes', 2)
+        )
+    else:
+        ValueError(f"InvalidTaskType: {task_type}")
+        
+    # Load state dict
+    model.load_state_dict(checkpoint['model_state_dict'])
+    model = model.to(device)
+    model.eval()  # Set model to evaluation mode
+    
+    print(f"Model loaded from {model_path}")
+    print("Model hyperparameters:")
+    for param, value in model_info.items():
+        print(f"  {param}: {value}")
+        
+    print("Model metrics:")
+    for metric, value in checkpoint['metrics'].items():
+        print(f"  {metric}: {value:.4f}")
+    
+    return model, model_info, checkpoint['metrics'] 
