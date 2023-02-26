@@ -2,6 +2,8 @@ import torch
 from torch.nn import Module
 from torch_geometric.nn import GCNConv, GATConv, SAGEConv
 from torch.nn import BatchNorm1d, Dropout, Linear
+from torch_geometric.nn import global_mean_pool, global_max_pool
+import torch.nn.functional as F
 
 class MoleculeNetRegressor(Module):
     def __init__(self, num_features, hidden_dim=64, layer_type='gcn', dropout_rate=0.2):
@@ -33,8 +35,33 @@ class MoleculeNetRegressor(Module):
         # Output layer
         self.out = Linear(hidden_dim * 2, 1)
     
-    def forward(self):
-        pass
+    def forward(self, x, edge_index, batch):
+        # Layer 1
+        x = self.conv1(x, edge_index)
+        x = self.bn1(x)
+        x = F.relu(x)
+        x = self.dropout(x)
+        
+        # Layer 2
+        x = self.conv2(x, edge_index)
+        x = self.bn2(x)
+        x = F.relu(x)
+        x = self.dropout(x)
+        
+        # Layer 3
+        x = self.conv3(x, edge_index)
+        x = self.bn3(x)
+        x = F.relu(x)
+        
+        # Global pooling
+        x_mean = global_mean_pool(x, batch)
+        x_max = global_max_pool(x, batch)
+        x = torch.cat([x_mean, x_max], dim=1)
+        
+        # Output
+        x = self.out(x)
+        
+        return x
     
 class MoleculeNetClassifier(Module):
     def __init__(self, num_features, hidden_dim=64, layer_type='gcn', dropout_rate=0.2, num_classes=2):
