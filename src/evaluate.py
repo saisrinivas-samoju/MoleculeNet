@@ -156,8 +156,13 @@ def evaluate_model(model, loader, device, task_type: Literal['classification', '
     actual : np.ndarray
         Array of actual values
     """
-    pass
-
+    if task_type=='classification':
+        return _evaluate_model_clf(model, loader, device)
+    elif task_type=='regression':
+        return _evaluate_model_reg(model, loader, device)
+    else:
+        raise ValueError(f"InvalidTaskType: {task_type}")
+    
 # only for classification items
 ### Adding a new function for confusion matrix visualization
 def plot_confusion_matrix(y_true, y_pred, class_names=None, figsize=(10, 8), cmap='Blues', normalize=False):
