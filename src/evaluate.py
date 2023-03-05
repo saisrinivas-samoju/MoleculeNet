@@ -1,11 +1,140 @@
 import math
+from typing import *
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import *
 import torch
 
-def evaluate_model(model, loader, device):
+def _evaluate_model_reg(model, loader, device):
+    model.eval()
+    predictions = []
+    actual = []
+    
+    with torch.no_grad():
+        for data in loader:
+            data = data.to(device)
+            # Ensure correct data types
+            x = data.x.float() # Convert features to float
+            edge_index = data.edge_index.long() # Convert edge indices to long
+            batch = data.batch.long() # Convert batch indices to long
+            
+            output = model(x, edge_index, batch) # Use type-converted tensors
+            pred = output.cpu().numpy()
+            target = data.y.view(-1, 1).float().cpu().numpy() # Ensure target is float
+            
+            predictions.extend(pred)
+            actual.extend(target)
+    
+    predictions = np.array(predictions).flatten()
+    actual = np.array(actual).flatten()
+    
+    # Calculate metrics
+    mse = mean_squared_error(actual, predictions)
+    rmse = math.sqrt(mse)
+    mae = mean_absolute_error(actual, predictions)
+    r2 = r2_score(actual, predictions)
+    
+    return {
+        'MSE': mse,
+        'RMSE': rmse,
+        'MAE': mae,
+        'R2': r2
+    }, predictions, actual
+    
+def _evaluate_model_clf(model, loader, device):
+    model.eval()
+    predictions = []
+    prediction_probs = []
+    actual = []
+    
+    with torch.no_grad():
+        for data in loader:
+            data = data.to(device)
+            # Ensure correct data types
+            x = data.x.float() # Convert features to float
+            edge_index = data.edge_index.long() # Convert edge indices to long
+            batch = data.batch.long() # Convert batch indices to long
+            
+            output = model(x, edge_index, batch) # Use type-converted tensors
+            
+            # Handle binary vs multi-class classification
+            if model.num_classes == 2:
+                # For binary classification
+                pred_prob = output[:, 0].cpu().numpy()
+                pred_label = (pred_prob > 0.5).astype(int)
+                target = data.y.cpu().numpy()
+            else:
+                # For multi-class classification
+                pred_prob = output[:, 0].cpu().numpy()
+                pred_label = np.argmax(pred_prob, axis=1)
+                target = data.y.cpu().numpy()
+            
+            predictions.extend(pred_label)
+            prediction_probs.extend(pred_prob)
+            actual.extend(target)
+    
+    predictions = np.array(predictions).flatten()
+    actual = np.array(actual).flatten()
+    prediction_probs = np.array(prediction_probs)
+    
+    # Calculate metrics
+    accuracy = accuracy_score(actual, predictions)
+    
+    # Handle potential warnings for binary case
+    if model.num_classes == 2:
+        precision_macro = precision_score(actual, predictions, average='macro', zero_division=0)
+        recall_macro = recall_score(actual, predictions, average='macro', zero_division=0)
+        f1_macro = f1_score(actual, predictions, average='macro', zero_division=0)
+        
+        # Also calculate binary metrics
+        precision = precision_score(actual, predictions, zero_division=0)
+        recall = recall_score(actual, predictions, zero_division=0)
+        f1 = f1_score(actual, predictions, zero_division=0)
+        
+        # Calculate cross-entropy loss
+        epsilon = 1e-15
+        prediction_probs = np.clip(prediction_probs, epsilon, 1 - epsilon)
+        loss = log_loss(actual, prediction_probs)
+        
+        metrics = {
+            'Accuracy': accuracy,
+            'Precision': precision,
+            'Recall': recall,
+            'F1': f1,
+            'Precision_macro': precision_macro,
+            'Recall_macro': recall_macro,
+            'F1_macro': f1_macro,
+            'Loss': loss
+        }
+    else:
+        # Multi-class metrics
+        precision_macro = precision_score(actual, predictions, average='macro', zero_division=0)
+        recall_macro = recall_score(actual, predictions, average='macro', zero_division=0)
+        f1_macro = f1_score(actual, predictions, average='macro', zero_division=0)
+        
+        # For multi-class, also add weighted versions
+        precision_weighted = precision_score(actual, predictions, average='weighted', zero_division=0)
+        recall_weighted = recall_score(actual, predictions, average='weighted', zero_division=0)
+        f1_weighted = f1_score(actual, predictions, average='weighted', zero_division=0)
+        
+        # Calculate cross-entropy loss
+        loss = log_loss(actual, prediction_probs)
+        
+        metrics = {
+            'Accuracy': accuracy,
+            'Precision_macro': precision_macro,
+            'Recall_macro': recall_macro,
+            'F1_macro': f1_macro,
+            'Precision_weighted': precision_weighted,
+            'Recall_weighted': recall_weighted,
+            'F1_weighted': f1_weighted,
+            'Loss': loss
+        }
+    
+    return metrics, predictions, actual
+
+def evaluate_model(model, loader, device, task_type: Literal['classification', 'regression']):
     """
     Evaluate a model on a dataset
     
