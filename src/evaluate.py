@@ -184,7 +184,39 @@ def plot_confusion_matrix(y_true, y_pred, class_names=None, figsize=(10, 8), cma
     normalize : bool, optional
         Whether to normalize confusion matrix values to percentages
     """
-    pass
+    # Compute confusion matrix
+    cm = confusion_matrix(y_true, y_pred)
+    
+    if class_names is None:
+        unique_classes = np.unique(np.concatenate([y_true, y_pred]))
+        class_names = [str(i) for i in range(len(unique_classes))]
+    
+    # Normalize if requested
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis] * 100
+        fmt = '.1f'
+        title = 'Normalized Confusion Matrix (%)'
+    else:
+        fmt = 'd'
+        title = 'Confusion Matrix'
+    
+    # Create figure
+    plt.figure(figsize=figsize)
+    
+    # Plot confusion matrix
+    sns.heatmap(cm, annot=True, fmt=fmt, cmap=cmap,
+                xticklabels=class_names, yticklabels=class_names)
+    
+    # Add labels and title
+    plt.ylabel('True Label')
+    plt.xlabel('Predicted Label')
+    plt.title(title)
+    
+    # Tight layout
+    plt.tight_layout()
+    
+    # Show plot
+    plt.show()
 
 # only for classification items
 def evaluate_and_visualize(model, loader, device, class_names=None):
