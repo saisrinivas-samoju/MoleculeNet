@@ -239,4 +239,16 @@ def evaluate_and_visualize(model, loader, device, class_names=None):
     metrics : dict
         Dictionary of evaluation metrics
     """
-    pass
+    # Evaluate model
+    metrics, predictions, actual = evaluate_model(model, loader, device)
+    
+    # Print metrics
+    print("Classification Report:")
+    for metric, value in metrics.items():
+        print(f"{metric}: {value:.4f}")
+    
+    # Plot confusion matrix
+    print("\nGenerating confusion matrix...")
+    plot_confusion_matrix(actual, predictions, class_names=class_names)
+    
+    return metrics
