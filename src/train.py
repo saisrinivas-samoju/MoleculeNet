@@ -66,3 +66,88 @@ def train_epoch(model, optimizer, train_loader, criterion, device, task_type:Lit
     
     epoch_loss = total_loss / max(num_batches, 1)
     return epoch_loss
+
+def train_model(model, optimizer, train_loader, val_loader, device, num_epochs=100, 
+                patience=10, criterion=None, scheduler=None, verbose=True):
+    # Set up loss function if not provided
+    if criterion is None:
+        criterion = nn.MSELoss()
+    
+    # Initialize tracking variables
+    best_val_loss = float('inf')
+    best_model_state = None
+    best_metrics = None
+    counter = 0
+    
+    # History tracking
+    history = {
+        'train_loss': [],
+        'val_loss': [],
+        'val_metrics': [],
+        'epoch_times': []
+    }
+    
+    # Main training loop
+    for epoch in range(num_epochs):
+        start_time = time.time()
+        
+        # Train for one epoch
+        train_loss = train_epoch(model, optimizer, train_loader, criterion, device)
+        
+        # Evaluate on validation set
+        val_metrics, _, _ = evaluate_model(model, val_loader, device)
+        val_loss = val_metrics['MSE']  # Use MSE as the validation loss
+        
+        # Update learning rate if scheduler is provided
+        if scheduler is not None:
+            ### Get current learning rate before stepping the scheduler
+            prev_lr = optimizer.param_groups[0]['lr'] ### Store previous learning rate
+            
+            scheduler.step(val_loss)
+            
+            ### Get updated learning rate after stepping the scheduler
+            if hasattr(scheduler, 'get_last_lr'):
+                current_lr = scheduler.get_last_lr()[0] ### Use recommended get_last_lr() method
+            else:
+                current_lr = optimizer.param_groups[0]['lr'] ### Fallback for schedulers without get_last_lr()
+            
+            ### Print notification if learning rate changed
+            if prev_lr != current_lr and verbose:
+                print(f"Learning rate changed from {prev_lr:.6f} to {current_lr:.6f}") ### Manual learning rate change notification
+        
+        # Record history
+        epoch_time = time.time() - start_time
+        history['train_loss'].append(train_loss)
+        history['val_loss'].append(val_loss)
+        history['val_metrics'].append(val_metrics)
+        history['epoch_times'].append(epoch_time)
+        
+        # Print progress
+        if verbose:
+            print(f"Epoch {epoch+1}/{num_epochs} | "
+                  f"Train Loss: {train_loss:.6f} | "
+                  f"Val Loss: {val_loss:.6f} | "
+                  f"Val RMSE: {val_metrics['RMSE']:.6f} | "
+                  f"Val R²: {val_metrics['R2']:.6f} | "
+                  f"Time: {epoch_time:.2f}s")
+        
+        # Check if this is the best model so far
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            best_model_state = model.state_dict().copy()
+            best_metrics = val_metrics.copy()
+            counter = 0
+        else:
+            counter += 1
+            
+        # Early stopping
+        if counter >= patience:
+            if verbose:
+                print(f"Early stopping at epoch {epoch+1}")
+            break
+    
+    # Load the best model
+    if best_model_state is not None:
+        model.load_state_dict(best_model_state)
+    
+    return model, history, best_metrics
