@@ -11,6 +11,27 @@ from src.evaluate import evaluate_model
 from config import task_type, LR_SCHEDULER_FACTOR, LR_SCHEDULER_PATIENCE
 
 def train_epoch(model, optimizer, train_loader, criterion, device, task_type:Literal['classification', 'regression']=task_type):
+    """
+    Train model for one epoch
+    
+    Parameters:
+    -----------
+    model : torch.nn.Module
+        The model to train
+    optimizer : torch.optim.Optimizer
+        The optimizer to use for training
+    train_loader : torch_geometric.loader.DataLoader
+        DataLoader for the training dataset
+    criterion : torch.nn.Module
+        Loss function
+    device : torch.device
+        Device to use for training
+    task_type: Literal['classificatin', 'regression']
+    Returns:
+    --------
+    epoch_loss : float
+        Average loss for the epoch
+    """
     model.train()
     total_loss = 0
     num_batches = 0
@@ -240,6 +261,41 @@ def _train_clf_model(model, optimizer, train_loader, val_loader, device, num_epo
 
 def train_model(model, optimizer, train_loader, val_loader, device, num_epochs=100, 
                 patience=10, criterion=None, scheduler=None, verbose=True, task_type:Literal['classification','regression']=task_type):
+    """
+    Train a model with early stopping
+    
+    Parameters:
+    -----------
+    model : torch.nn.Module
+        The model to train
+    optimizer : torch.optim.Optimizer
+        The optimizer to use for training
+    train_loader : torch_geometric.loader.DataLoader
+        DataLoader for the training dataset
+    val_loader : torch_geometric.loader.DataLoader
+        DataLoader for the validation dataset
+    device : torch.device
+        Device to use for training
+    num_epochs : int
+        Maximum number of epochs to train for
+    patience : int
+        Number of epochs to wait for improvement before early stopping
+    criterion : torch.nn.Module
+        Loss function (defaults to MSE Loss)
+    scheduler : torch.optim.lr_scheduler._LRScheduler
+        Learning rate scheduler
+    verbose : bool
+        Whether to print progress
+        
+    Returns:
+    --------
+    model : torch.nn.Module
+        The trained model
+    history : dict
+        Dictionary containing training history
+    best_metrics : dict
+        Dictionary containing best validation metrics
+    """
     if task_type=='classification':
         return _train_clf_model(model=model, optimizer=optimizer, train_loader=train_loader, val_loader=val_loader, device=device, num_epochs=num_epochs, patience=patience, criterion=criterion, scheduler=scheduler, verbose=verbose)
     elif task_type=='regression':
@@ -249,7 +305,14 @@ def train_model(model, optimizer, train_loader, val_loader, device, num_epochs=1
     
 def plot_training_history(history, task_type:Literal['classification','regression']=task_type):
     plt.figure(figsize=(12, 5))
+    """
+    Plot training and validation loss over epochs
     
+    Parameters:
+    -----------
+    history : dict
+        Dictionary containing training history
+    """
     # Plot losses
     plt.subplot(1, 2, 1)
     plt.plot(history['train_loss'], label='Training Loss')
@@ -285,6 +348,41 @@ def plot_training_history(history, task_type:Literal['classification','regressio
     
 def setup_training(model, train_loader, val_loader, device, learning_rate=0.001,
                   weight_decay=0, num_epochs=100, patience=10, verbose=True):
+    """
+    Set up and run the complete training process
+    
+    Parameters:
+    -----------
+    model : torch.nn.Module
+        The model to train
+    train_loader : torch_geometric.loader.DataLoader
+        DataLoader for the training dataset
+    val_loader : torch_geometric.loader.DataLoader
+        DataLoader for the validation dataset
+    device : torch.device
+        Device to use for training
+    learning_rate : float
+        Learning rate for the optimizer
+    weight_decay : float
+        Weight decay (L2 penalty) for the optimizer
+    num_epochs : int
+        Maximum number of epochs to train for
+    patience : int
+        Number of epochs to wait for improvement before early stopping
+    verbose : bool
+        Whether to print progress
+        
+    Returns:
+    --------
+    model : torch.nn.Module
+        The trained model
+    optimizer : torch.optim.Optimizer
+        The optimizer used for training
+    history : dict
+        Dictionary containing training history
+    metrics : dict
+        Dictionary containing best validation metrics
+    """
     # Set up optimizer
     optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
     
