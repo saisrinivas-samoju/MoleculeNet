@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import *
 import torch
+from config import task_type
 
 def _evaluate_model_reg(model, loader, device):
     model.eval()
@@ -134,7 +135,7 @@ def _evaluate_model_clf(model, loader, device):
     
     return metrics, predictions, actual
 
-def evaluate_model(model, loader, device, task_type: Literal['classification', 'regression']):
+def evaluate_model(model, loader, device, task_type: Literal['classification', 'regression']=task_type):
     """
     Evaluate a model on a dataset
     

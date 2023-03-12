@@ -1,6 +1,7 @@
 import os
 from typing import *
 import torch
+from config import task_type
 from src.model_architecture import MoleculeNetRegressor, MoleculeNetClassifier
 
 def save_model(model, optimizer, model_info, metrics, model_path, model_name) -> None:
@@ -38,7 +39,7 @@ def save_model(model, optimizer, model_info, metrics, model_path, model_name) ->
     
     print(f"Model saved to {model_file}")
 
-def load_model(model_path, device, task_type: Literal['classification', 'regression']) -> tuple:
+def load_model(model_path, device, task_type: Literal['classification', 'regression']=task_type) -> tuple:
     """
     Load model with metadata
     
