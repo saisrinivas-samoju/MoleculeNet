@@ -246,3 +246,39 @@ def train_model(model, optimizer, train_loader, val_loader, device, num_epochs=1
         return _train_reg_model(model=model, optimizer=optimizer, train_loader=train_loader, val_loader=val_loader, device=device, num_epochs=num_epochs, patience=patience, criterion=criterion, scheduler=scheduler, verbose=verbose)
     else:
         raise ValueError(f"InvalidTaskType: {task_type}")
+    
+def plot_training_history(history, task_type:Literal['classification','regression']=task_type):
+    plt.figure(figsize=(12, 5))
+    
+    # Plot losses
+    plt.subplot(1, 2, 1)
+    plt.plot(history['train_loss'], label='Training Loss')
+    plt.plot(history['val_loss'], label='Validation Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('Training and Validation Loss')
+    plt.legend()
+    
+    # Plot metrics
+    plt.subplot(1, 2, 2)
+    if task_type=='regression':
+        metrics = ['RMSE', 'R2']
+        for metric in metrics:
+            values = [m[metric] for m in history['val_metrics']]
+            plt.plot(values, label=f'Validation {metric}')
+    elif task_type=='classification':
+        metrics = ['F1_macro', 'Accuracy', 'Precision_macro', 'Recall_macro']
+        for metric in metrics:
+            if any(metric in m for m in history['val_metrics']):
+                values = [m[metric] for m in history['val_metrics']]
+                plt.plot(values, label=f'Validation {metric}')  
+    else:
+        raise ValueError(f"InvalidTaskType: {task_type}")
+        
+    plt.xlabel('Epoch')
+    plt.ylabel('Metric Value')
+    plt.title('Validation Metrics')
+    plt.legend()
+    
+    plt.tight_layout()
+    plt.show()
