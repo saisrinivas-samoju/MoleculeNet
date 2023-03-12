@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from src.evaluate import evaluate_model
-from config import task_type
+from config import task_type, LR_SCHEDULER_FACTOR, LR_SCHEDULER_PATIENCE
 
 def train_epoch(model, optimizer, train_loader, criterion, device, task_type:Literal['classification', 'regression']=task_type):
     model.train()
@@ -282,3 +282,29 @@ def plot_training_history(history, task_type:Literal['classification','regressio
     
     plt.tight_layout()
     plt.show()
+    
+def setup_training(model, train_loader, val_loader, device, learning_rate=0.001,
+                  weight_decay=0, num_epochs=100, patience=10, verbose=True):
+    # Set up optimizer
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    
+    # Set up learning rate scheduler
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, mode='min', factor=LR_SCHEDULER_FACTOR, patience=LR_SCHEDULER_PATIENCE
+    )
+    
+    # Train the model
+    model, history, metrics = train_model(
+        model=model,
+        optimizer=optimizer,
+        train_loader=train_loader,
+        val_loader=val_loader,
+        device=device,
+        num_epochs=num_epochs,
+        patience=patience,
+        scheduler=scheduler,
+        verbose=verbose
+    )
+    
+    # Return the trained model and training info
+    return model, optimizer, history, metrics
