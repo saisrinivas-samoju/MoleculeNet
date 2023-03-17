@@ -27,5 +27,23 @@ def predict_molecule(model, data, device):
         prediction = model(x, edge_index, batch)  # Use type-converted tensors
         return prediction.item()
 
-def predict_molecules():
-    pass
+def predict_molecules(model, data_list, device):
+    predictions = []
+    smiles_list = []
+    
+    for item in data_list:
+        # Store SMILES if available
+        if isinstance(item, str):
+            smiles = item
+            smiles_list.append(smiles)
+        elif hasattr(item, 'smiles'):
+            smiles = item.smiles
+            smiles_list.append(smiles)
+        else:
+            smiles_list.append(None)
+        
+        # Make prediction
+        pred_val = predict_molecule(model, item, device)
+        predictions.append(pred_val)
+    
+    return predictions, smiles_list 
