@@ -5,6 +5,25 @@ from torch_geometric.utils import from_smiles
 from config import task_type
 
 def predict_molecule(model, data, device, task_type: Literal['regression', 'classification']=task_type):
+    """
+    Predict a property for a single molecule
+    
+    Parameters:
+    -----------
+    model : torch.nn.Module
+        The model to use for prediction
+    data : torch_geometric.data.Data or str
+        The molecule data or SMILES string
+    device : torch.device
+        Device to use for prediction
+        
+    Returns:
+    --------
+    prediction : int or list
+        The predicted class (for binary) or class probabilities (for multi-class)
+    prob : float or list
+        The prediction probability or probabilities
+    """
     model.eval()
     with torch.no_grad():
         # Convert SMILES to data object if a string is provided
@@ -53,6 +72,27 @@ def predict_molecule(model, data, device, task_type: Literal['regression', 'clas
             raise ValueError(f"InvalidTaskType: {task_type}")
 
 def predict_molecules(model, data_list, device, task_type: Literal['regression', 'classification']=task_type):
+    """
+    Predict properties for multiple molecules
+    
+    Parameters:
+    -----------
+    model : torch.nn.Module
+        The model to use for prediction
+    data_list : list
+        List of Data objects or SMILES strings
+    device : torch.device
+        Device to use for prediction
+        
+    Returns:
+    --------
+    predictions : list
+        List of predicted classes
+    probabilities : list
+        List of prediction probabilities
+    smiles_list : list
+        List of SMILES strings if available
+    """
     predictions = []
     smiles_list = []
     probabilities = []
