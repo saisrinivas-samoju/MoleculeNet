@@ -1,0 +1,181 @@
+{
+    "models": [
+        {
+            "id": "esol_solubility",
+            "name": "Solubility Predictor",
+            "model_file": "models/ESOL-made_gcn_full.pt",
+            "description": "Predicts aqueous solubility using graph neural networks trained on the ESOL dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "solubility",
+                    "name": "Solubility",
+                    "output_key": "predicted_solubility",
+                    "unit": "log(mol/L)",
+                    "badge": "ESOL",
+                    "interpretations": [
+                        {
+                            "threshold": 0,
+                            "text": "Highly soluble in water",
+                            "color": "#4caf50"
+                        },
+                        {
+                            "threshold": -1,
+                            "text": "Moderately soluble in water",
+                            "color": "#8bc34a"
+                        },
+                        {
+                            "threshold": -4,
+                            "text": "Poorly soluble in water",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Practically insoluble in water",
+                            "color": "#f44336"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "freesolvation",
+            "name": "Solvation Energy Predictor",
+            "model_file": "models/FreeSolv-made_gcn_full.pt",
+            "description": "Predicts hydration free energy using graph neural networks",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "free_solvation",
+                    "name": "Solvation Energy",
+                    "output_key": "predicted_solvation",
+                    "unit": "kcal/mol",
+                    "badge": "FreeSolv",
+                    "interpretations": [
+                        {
+                            "threshold": -2,
+                            "text": "Very favorable hydration",
+                            "color": "#4caf50"
+                        },
+                        {
+                            "threshold": -5,
+                            "text": "Favorable hydration",
+                            "color": "#8bc34a"
+                        },
+                        {
+                            "threshold": -10,
+                            "text": "Moderate hydration",
+                            "color": "#ffc107"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low hydration",
+                            "color": "#ff9800"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "lipophilicity",
+            "name": "Lipophilicity Predictor",
+            "model_file": "models/Lipo-made_gcn_full.pt",
+            "description": "Predicts lipophilicity using graph neural networks",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "lipophilicity",
+                    "name": "Lipophilicity",
+                    "output_key": "predicted_lipophilicity",
+                    "unit": "logD",
+                    "badge": "Lipo",
+                    "interpretations": [
+                        {
+                            "threshold": 5,
+                            "text": "Highly lipophilic",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 3,
+                            "text": "Moderately lipophilic",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": 0,
+                            "text": "Balanced",
+                            "color": "#8bc34a"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "multi_property",
+            "name": "Lipophilicity & BBB Predictor",
+            "model_file": "models/multi_property_full.pt",
+            "description": "Predicts lipophilicity and blood-brain barrier penetration simultaneously",
+            "enabled": false,
+            "properties": [
+                {
+                    "id": "lipophilicity",
+                    "name": "Lipophilicity",
+                    "output_key": "predicted_lipophilicity",
+                    "unit": "logD",
+                    "badge": "Lipo",
+                    "interpretations": [
+                        {
+                            "threshold": 5,
+                            "text": "Highly lipophilic",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 3,
+                            "text": "Moderately lipophilic",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": 0,
+                            "text": "Balanced",
+                            "color": "#8bc34a"
+                        },
+                        {
+                            "threshold": -2,
+                            "text": "Hydrophilic",
+                            "color": "#4caf50"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Highly hydrophilic",
+                            "color": "#2196f3"
+                        }
+                    ]
+                },
+                {
+                    "id": "blood_brain_barrier",
+                    "name": "Blood-Brain Barrier",
+                    "output_key": "predicted_bbb",
+                    "unit": "",
+                    "badge": "BBB",
+                    "is_binary": true,
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "Likely to penetrate BBB",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "May penetrate BBB",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Unlikely to penetrate BBB",
+                            "color": "#4caf50"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

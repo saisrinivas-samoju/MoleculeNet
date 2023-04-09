@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Molecular Property Prediction</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Molecular Property Prediction</h1>
+            <p>Predict molecular properties using advanced graph neural networks</p>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="card" id="input-card">
+                <h2 class="card-title">Enter Molecule Details</h2>
+                <p>Enter a SMILES string or compound name to predict properties</p>
+                
+                <div class="property-selector">
+                    <label for="property-select">Properties to Predict:</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="solubility" checked> Solubility (ESOL)
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="freesolvation" disabled> Solvation Energy (FreeSolv)
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="lipophilicity" disabled> Lipophilicity
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="bbbp" disabled> Blood-Brain Barrier Penetration
+                        </label>
+                    </div>
+                </div>
+                
+                <form id="molecule-form">
+                    <div class="form-group">
+                        <label for="molecule-input" class="form-label">Molecule Input</label>
+                        <input 
+                            type="text" 
+                            id="molecule-input" 
+                            class="form-input" 
+                            placeholder="Enter SMILES string (e.g. CC(=O)OC1=CC=CC=C1C(=O)O) or compound name (e.g. Aspirin)" 
+                            required
+                        >
+                        <div class="input-info">
+                            We'll automatically detect if you've entered a SMILES string or compound name
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-block">Predict</button>
+                </form>
+            </div>
+
+            <div id="results-section" class="hidden">
+                <h2 class="section-title">Prediction Results</h2>
+                <div class="prediction-grid" id="prediction-results">
+                    <!-- Prediction cards will be inserted here -->
+                </div>
+                
+                <div class="molecule-info card">
+                    <h3 class="card-title">Molecule Information</h3>
+                    <div id="molecule-details">
+                        <!-- Molecule details will be inserted here -->
+                    </div>
+                </div>
+                
+                <button id="back-button" class="btn btn-secondary">Make Another Prediction</button>
+            </div>
+            
+            <div id="about-section">
+                <div class="card">
+                    <h2 class="card-title">About This Tool</h2>
+                    <p>This tool predicts various molecular properties using graph neural networks. The current model is trained on the ESOL dataset and optimized for predicting log solubility in mol/L.</p>
+                    <p>You can input either:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>A SMILES string representing the molecular structure</li>
+                        <li>A common name of a chemical compound (which will be converted to SMILES)</li>
+                    </ul>
+                    <p style="margin-top: 10px;">Future updates will include support for additional properties from the MoleculeNet collection.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2023 Molecular Property Prediction | Built with Graph Neural Networks</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', path='/script.js') }}"></script>
+</body>
+</html> 
