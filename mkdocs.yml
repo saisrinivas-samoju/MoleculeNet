@@ -1,0 +1,41 @@
+site_name: Molecule Property Prediction
+site_url: https://example.com/
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: custom
+    accent: custom
+  font:
+    text: Poppins
+    code: Roboto Mono
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - content.tabs.link
+    - navigation.indexes
+    - toc.integrate
+  icon:
+    logo: material/flask
+    favicon: material/flask
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+
+nav:
+  - Home: index.md
+  - Documentation: documentation.md
+
+# Remove "Made with Material for MkDocs" footer
+copyright: ""
+extra:
+  generator: false 
