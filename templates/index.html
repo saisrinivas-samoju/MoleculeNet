@@ -25,20 +25,30 @@
                 
                 <div class="property-selector">
                     <label for="property-select">Properties to Predict:</label>
-                    <div class="checkbox-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" value="solubility" checked> Solubility (ESOL)
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" value="freesolvation" disabled> Solvation Energy (FreeSolv)
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" value="lipophilicity" disabled> Lipophilicity
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" value="bbbp" disabled> Blood-Brain Barrier Penetration
-                        </label>
+                    
+                    <!-- Presets Section -->
+                    <div class="presets-section" id="presets-section">
+                        <div class="presets-label">Quick Select:</div>
+                        <div class="presets-buttons" id="presets-buttons">
+                            <!-- Presets will be dynamically generated -->
+                        </div>
                     </div>
+                    
+                    <!-- Schema-driven Accordion Sections -->
+                    <div class="prediction-options-container" id="prediction-options-container">
+                        <!-- Options will be dynamically generated from model_registry.json -->
+                        <div class="zero-state" id="zero-state" style="display: none;">
+                            <p>No prediction models available for this selection.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Selection Summary (Floating) -->
+                    <div class="selection-summary" id="selection-summary">
+                        <span class="selection-count">Selected: <strong id="selection-count">0</strong> predictions</span>
+                    </div>
+                    
+                    <!-- Availability Message (Inline, non-blocking) -->
+                    <div class="availability-message" id="availability-message" style="display: none;"></div>
                 </div>
                 
                 <form id="molecule-form">
@@ -56,7 +66,7 @@
                             Your input will be automatically classified as either a SMILES string or a compound name.
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-block">Predict</button>
+                    <button type="submit" class="btn btn-block" id="run-predictions-btn" disabled>Run Predictions</button>
                 </form>
             </div>
 

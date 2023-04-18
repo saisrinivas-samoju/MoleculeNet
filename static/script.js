@@ -13,7 +13,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const predictionResults = document.getElementById('prediction-results');
     const moleculeDetails = document.getElementById('molecule-details');
     const backButton = document.getElementById('back-button');
-    const propertyCheckboxes = document.querySelector('.checkbox-group');
+    const predictionOptionsContainer = document.getElementById('prediction-options-container');
+    const presetsButtons = document.getElementById('presets-buttons');
+    const selectionSummary = document.getElementById('selection-summary');
+    const selectionCount = document.getElementById('selection-count');
+    const availabilityMessage = document.getElementById('availability-message');
+    const runPredictionsBtn = document.getElementById('run-predictions-btn');
+    const zeroState = document.getElementById('zero-state');
+    
+    // Track selected model IDs
+    let selectedModelIds = new Set();
     
     // Initialize: Fetch model registry and set up the UI
     async function initializeApp() {
@@ -28,8 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
             MODEL_REGISTRY = await response.json();
             console.log("Model registry loaded:", MODEL_REGISTRY);
             
-            // Populate property checkboxes based on available models
-            updatePropertyCheckboxes();
+            // Build schema-driven UI
+            buildSchemaDrivenUI();
+            buildPresets();
+            updateSelectionSummary();
             
         } catch (error) {
             console.error("Error initializing app:", error);
@@ -37,26 +48,466 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Update property checkboxes based on available models
-    function updatePropertyCheckboxes() {
-        // Clear existing checkboxes
-        propertyCheckboxes.innerHTML = '';
+    /**
+     * Build the schema-driven UI from model_registry.json
+     * Groups models by ui.section, then by ui.group, respecting ui.order
+     */
+    function buildSchemaDrivenUI() {
+        // Clear existing content
+        predictionOptionsContainer.innerHTML = '';
+        selectedModelIds.clear();
         
-        // Add checkboxes for each property from each model
-        MODEL_REGISTRY.models.forEach(model => {
-            // Skip disabled models
-            if (!model.enabled) return;
+        // Filter to only enabled models
+        const enabledModels = MODEL_REGISTRY.models.filter(model => model.enabled === true);
+        
+        if (enabledModels.length === 0) {
+            zeroState.style.display = 'block';
+            return;
+        }
+        
+        zeroState.style.display = 'none';
+        
+        // Group models by section
+        const sectionsMap = new Map();
+        
+        enabledModels.forEach(model => {
+            const sectionName = model.ui?.section || 'Other';
+            const groupName = model.ui?.group || 'Other';
+            const order = model.ui?.order || 999;
             
-            model.properties.forEach(property => {
-                const checkboxHtml = `
-                    <label class="checkbox-label" title="${model.description}">
-                        <input type="checkbox" value="${property.id}" data-model="${model.id}" ${model.id === "esol_solubility" ? "checked" : ""}>
-                        ${property.name} <span class="badge">${property.badge}</span>
-                    </label>
-                `;
-                propertyCheckboxes.insertAdjacentHTML('beforeend', checkboxHtml);
+            if (!sectionsMap.has(sectionName)) {
+                sectionsMap.set(sectionName, new Map());
+            }
+            
+            const groupsMap = sectionsMap.get(sectionName);
+            if (!groupsMap.has(groupName)) {
+                groupsMap.set(groupName, []);
+            }
+            
+            groupsMap.get(groupName).push({ model, order });
+        });
+        
+        // Sort sections (we'll use the first model's order in each section as section order)
+        const sections = Array.from(sectionsMap.entries()).map(([sectionName, groupsMap]) => {
+            // Get minimum order from all groups in this section
+            let minOrder = Infinity;
+            groupsMap.forEach((models) => {
+                models.forEach(({ order }) => {
+                    if (order < minOrder) minOrder = order;
+                });
+            });
+            
+            return { sectionName, groupsMap, order: minOrder };
+        }).sort((a, b) => a.order - b.order);
+        
+        // Special handling: Normalize SIDER section name and merge if needed
+        const normalizedSections = [];
+        const siderSections = [];
+        
+        sections.forEach(({ sectionName, groupsMap, order }) => {
+            const isSIDER = sectionName === 'Adverse Effects (Side Effects)' || 
+                          sectionName.includes('Adverse Effects') ||
+                          sectionName.includes('Side Effects');
+            
+            if (isSIDER) {
+                // Collect all SIDER groups
+                siderSections.push({ sectionName, groupsMap, order });
+            } else {
+                normalizedSections.push({ sectionName, groupsMap, order });
+            }
+        });
+        
+        // Merge all SIDER sections into one "Adverse Effects" section
+        if (siderSections.length > 0) {
+            const mergedSIDERGroups = new Map();
+            let minSIDEROrder = Infinity;
+            
+            siderSections.forEach(({ groupsMap, order }) => {
+                if (order < minSIDEROrder) minSIDEROrder = order;
+                groupsMap.forEach((models, groupName) => {
+                    if (!mergedSIDERGroups.has(groupName)) {
+                        mergedSIDERGroups.set(groupName, []);
+                    }
+                    mergedSIDERGroups.get(groupName).push(...models);
+                });
+            });
+            
+            // Sort groups within merged SIDER section
+            mergedSIDERGroups.forEach((models, groupName) => {
+                models.sort((a, b) => a.order - b.order);
+            });
+            
+            normalizedSections.push({
+                sectionName: 'Adverse Effects',
+                groupsMap: mergedSIDERGroups,
+                order: minSIDEROrder
+            });
+        }
+        
+        // Sort all sections by order
+        normalizedSections.sort((a, b) => a.order - b.order);
+        
+        // Build accordion sections
+        normalizedSections.forEach(({ sectionName, groupsMap }) => {
+            const isSIDER = sectionName === 'Adverse Effects';
+            const sectionElement = createAccordionSection(sectionName, groupsMap, isSIDER);
+            predictionOptionsContainer.appendChild(sectionElement);
+        });
+        
+        // Add event listeners for all checkboxes
+        attachCheckboxListeners();
+    }
+    
+    /**
+     * Create an accordion section with groups
+     */
+    function createAccordionSection(sectionName, groupsMap, isSIDER = false) {
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'accordion-section';
+        
+        // Section header
+        const sectionHeader = document.createElement('div');
+        sectionHeader.className = 'accordion-section-header';
+        sectionHeader.innerHTML = `
+            <span class="accordion-section-title">${sectionName}</span>
+            <span class="accordion-icon">▼</span>
+        `;
+        
+        // Section content
+        const sectionContent = document.createElement('div');
+        sectionContent.className = 'accordion-section-content';
+        
+        // Sort groups by order
+        const groups = Array.from(groupsMap.entries()).map(([groupName, models]) => {
+            // Sort models within group by order
+            models.sort((a, b) => a.order - b.order);
+            return { groupName, models };
+        }).sort((a, b) => {
+            // Sort groups by minimum order in group
+            const aMin = Math.min(...a.models.map(m => m.order));
+            const bMin = Math.min(...b.models.map(m => m.order));
+            return aMin - bMin;
+        });
+        
+        // Build groups
+        groups.forEach(({ groupName, models }) => {
+            const groupDiv = createGroup(groupName, models, isSIDER);
+            sectionContent.appendChild(groupDiv);
+        });
+        
+        // Toggle section on header click
+        sectionHeader.addEventListener('click', () => {
+            sectionDiv.classList.toggle('expanded');
+            const icon = sectionHeader.querySelector('.accordion-icon');
+            icon.textContent = sectionDiv.classList.contains('expanded') ? '▲' : '▼';
+        });
+        
+        // All sections start collapsed by default
+        sectionDiv.classList.remove('expanded');
+        
+        sectionDiv.appendChild(sectionHeader);
+        sectionDiv.appendChild(sectionContent);
+        
+        return sectionDiv;
+    }
+    
+    /**
+     * Create a group with toggle rows
+     * For all sections (including SIDER), show models directly without group-level collapsibility
+     */
+    function createGroup(groupName, models, isSIDER = false) {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'prediction-group';
+        
+        // For all sections, just add toggle rows directly (one per model)
+        // No special collapsible groups - models are shown directly when section is expanded
+        models.forEach(({ model }) => {
+            const toggleRow = createToggleRow(model);
+            groupDiv.appendChild(toggleRow);
+        });
+        
+        return groupDiv;
+    }
+    
+    /**
+     * Format property name for display
+     * Normalizes property names to be human-readable
+     * This serves as a safeguard to ensure consistent display even if data has minor inconsistencies
+     */
+    function formatPropertyName(propertyName) {
+        if (!propertyName) return '';
+        
+        // If name contains underscores, it needs formatting
+        if (propertyName.includes('_')) {
+            // Replace underscores with spaces
+            let formatted = propertyName.replace(/_/g, ' ');
+            
+            // Split by spaces and capitalize each word properly
+            const words = formatted.split(' ');
+            formatted = words.map(word => {
+                // If word is all uppercase and short (like "FDA", "CT", "HIV", "BBB"), keep it uppercase
+                if (word === word.toUpperCase() && word.length <= 5) {
+                    return word;
+                }
+                // Otherwise, capitalize first letter, lowercase rest
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            }).join(' ');
+            
+            return formatted;
+        }
+        
+        // If name is all uppercase (like "CT_TOX" without underscore after our JSON fix), format it
+        if (propertyName === propertyName.toUpperCase() && propertyName.length > 3) {
+            // Split by spaces if any, otherwise treat as single word
+            const words = propertyName.split(' ');
+            return words.map(word => {
+                if (word.length <= 5) {
+                    return word; // Keep short acronyms uppercase
+                }
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            }).join(' ');
+        }
+        
+        // Already properly formatted, return as-is
+        return propertyName;
+    }
+    
+    /**
+     * Create a toggle row for a model (shows all properties of the model)
+     */
+    function createToggleRow(model) {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'toggle-row';
+        
+        const label = document.createElement('label');
+        label.className = 'toggle-label';
+        label.title = model.description || '';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = model.id;
+        checkbox.dataset.modelId = model.id;
+        
+        // Dataset badge
+        const datasetBadge = model.dataset?.id || '';
+        
+        // Build label text with all property names (formatted for display)
+        const propertyNames = model.properties.map(p => formatPropertyName(p.name)).join(', ');
+        
+        const labelText = document.createElement('span');
+        labelText.className = 'toggle-label-text';
+        labelText.innerHTML = `
+            ${propertyNames}
+            ${datasetBadge ? `<span class="dataset-badge">${datasetBadge}</span>` : ''}
+        `;
+        
+        label.appendChild(checkbox);
+        label.appendChild(labelText);
+        rowDiv.appendChild(label);
+        
+        return rowDiv;
+    }
+    
+    /**
+     * Attach event listeners to all checkboxes
+     */
+    function attachCheckboxListeners() {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"][data-model-id]');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                updateModelSelection(checkbox);
             });
         });
+    }
+    
+    /**
+     * Update model selection based on checkbox state
+     * This is called both from event listeners and programmatic changes
+     */
+    function updateModelSelection(checkbox) {
+        const modelId = checkbox.dataset.modelId;
+        
+        if (checkbox.checked) {
+            selectedModelIds.add(modelId);
+        } else {
+            selectedModelIds.delete(modelId);
+        }
+        
+        updateSelectionSummary();
+        updateRunButton();
+        checkAvailability();
+    }
+    
+    /**
+     * Build presets from registry
+     */
+    function buildPresets() {
+        presetsButtons.innerHTML = '';
+        
+        // Collect all unique presets from enabled models
+        const presetsSet = new Set();
+        MODEL_REGISTRY.models.forEach(model => {
+            if (model.enabled && model.presets) {
+                model.presets.forEach(preset => presetsSet.add(preset));
+            }
+        });
+        
+        // Add "Full Profile" preset (selects all enabled models)
+        const fullProfileBtn = document.createElement('button');
+        fullProfileBtn.className = 'preset-btn';
+        fullProfileBtn.textContent = 'Full Profile';
+        fullProfileBtn.dataset.preset = 'full_profile';
+        fullProfileBtn.addEventListener('click', () => selectPreset('full_profile'));
+        presetsButtons.appendChild(fullProfileBtn);
+        
+        // Add other presets
+        const presets = Array.from(presetsSet).sort();
+        presets.forEach(preset => {
+            const presetBtn = document.createElement('button');
+            presetBtn.className = 'preset-btn';
+            presetBtn.textContent = formatPresetName(preset);
+            presetBtn.dataset.preset = preset;
+            presetBtn.addEventListener('click', () => selectPreset(preset));
+            presetsButtons.appendChild(presetBtn);
+        });
+    }
+    
+    /**
+     * Format preset name for display
+     */
+    function formatPresetName(preset) {
+        // Special handling for common abbreviations
+        const abbreviations = {
+            'adme': 'Absorption, Distribution, Metabolism, Excretion'
+        };
+        
+        const lowerPreset = preset.toLowerCase();
+        if (abbreviations[lowerPreset]) {
+            return abbreviations[lowerPreset];
+        }
+        
+        // Default formatting: capitalize words separated by underscores
+        return preset
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    }
+    
+    /**
+     * Select a preset
+     */
+    function selectPreset(presetName) {
+        // Clear all selections first
+        selectedModelIds.clear();
+        document.querySelectorAll('input[type="checkbox"][data-model-id]').forEach(cb => {
+            cb.checked = false;
+        });
+        
+        // Collect models to select
+        const modelsToSelect = [];
+        
+        if (presetName === 'full_profile') {
+            // Select all enabled models
+            MODEL_REGISTRY.models.forEach(model => {
+                if (model.enabled) {
+                    modelsToSelect.push(model.id);
+                }
+            });
+        } else {
+            // Select models with this preset
+            MODEL_REGISTRY.models.forEach(model => {
+                if (model.enabled && model.presets && model.presets.includes(presetName)) {
+                    modelsToSelect.push(model.id);
+                }
+            });
+        }
+        
+        // Update checkboxes and selection state
+        // First, add all model IDs to the Set
+        modelsToSelect.forEach(modelId => {
+            selectedModelIds.add(modelId);
+        });
+        
+        // Then, update all checkboxes (this ensures consistency)
+        modelsToSelect.forEach(modelId => {
+            document.querySelectorAll(`input[data-model-id="${modelId}"]`).forEach(cb => {
+                cb.checked = true;
+            });
+        });
+        
+        // Update UI once after all selections
+        updateSelectionSummary();
+        updateRunButton();
+        checkAvailability();
+    }
+    
+    /**
+     * Update selection summary
+     */
+    function updateSelectionSummary() {
+        const count = selectedModelIds.size;
+        selectionCount.textContent = count;
+        
+        if (count === 0) {
+            selectionSummary.style.display = 'none';
+        } else {
+            selectionSummary.style.display = 'block';
+        }
+    }
+    
+    /**
+     * Update Run Predictions button state
+     */
+    function updateRunButton() {
+        const hasEnabledSelections = selectedModelIds.size > 0;
+        runPredictionsBtn.disabled = !hasEnabledSelections;
+    }
+    
+    /**
+     * Check availability and show message if needed
+     */
+    function checkAvailability() {
+        // Get selected model IDs
+        const selected = Array.from(selectedModelIds);
+        
+        // Check which are actually enabled
+        const enabledSelected = selected.filter(modelId => {
+            const model = MODEL_REGISTRY.models.find(m => m.id === modelId);
+            return model && model.enabled;
+        });
+        
+        const unavailable = selected.length - enabledSelected.length;
+        
+        if (unavailable > 0) {
+            availabilityMessage.textContent = 
+                `${enabledSelected.length} predictions will run, ${unavailable} unavailable`;
+            availabilityMessage.style.display = 'block';
+        } else {
+            availabilityMessage.style.display = 'none';
+        }
+    }
+    
+    /**
+     * Get selected properties and their models
+     * Returns all properties from all selected enabled models
+     */
+    function getSelectedProperties() {
+        const selected = [];
+        
+        selectedModelIds.forEach(modelId => {
+            const model = MODEL_REGISTRY.models.find(m => m.id === modelId);
+            if (model && model.enabled) {
+                // Include all properties from this model
+                model.properties.forEach(property => {
+                    selected.push({
+                        propertyId: property.id,
+                        modelId: model.id
+                    });
+                });
+            }
+        });
+        
+        return selected;
     }
     
     // Form submission
@@ -66,14 +517,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const inputValue = moleculeInput.value.trim();
         if (!inputValue) return;
         
-        // Hide about section, show results section
-        aboutSection.classList.add('hidden');
-        resultsSection.classList.remove('hidden');
-        
-        // Clear previous results
-        predictionResults.innerHTML = '';
-        moleculeDetails.innerHTML = '';
-        
         // Get selected properties and their models
         const selectedProperties = getSelectedProperties();
         if (selectedProperties.length === 0) {
@@ -81,8 +524,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        // Get unique model IDs needed for these properties
+        // Get unique model IDs needed for these properties (only enabled ones)
         const modelIds = [...new Set(selectedProperties.map(prop => prop.modelId))];
+        
+        // Hide about section, show results section
+        aboutSection.classList.add('hidden');
+        resultsSection.classList.remove('hidden');
+        
+        // Clear previous results
+        predictionResults.innerHTML = '';
+        moleculeDetails.innerHTML = '';
         
         // Create loading cards for each selected property
         selectedProperties.forEach(prop => {
@@ -163,15 +614,6 @@ document.addEventListener('DOMContentLoaded', () => {
         aboutSection.classList.remove('hidden');
         moleculeInput.value = '';
     });
-    
-    // Helper function to get selected properties
-    function getSelectedProperties() {
-        const checkboxes = document.querySelectorAll('.checkbox-group input[type="checkbox"]:checked:not(:disabled)');
-        return Array.from(checkboxes).map(checkbox => ({
-            propertyId: checkbox.value,
-            modelId: checkbox.dataset.model
-        }));
-    }
     
     // Find property configuration in registry
     function findPropertyConfig(modelId, propertyId) {
@@ -336,4 +778,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize the application
     initializeApp();
-}); 
+});
