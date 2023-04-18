@@ -71,10 +71,47 @@ class MoleculeDataset(Dataset):
         
     def __load_data(self) -> None:
         if self.root is not None and self.name is not None:
+            if self.label_colname is not None and self.filepath is not None and os.path.exists(self.filepath):
+                try:
+                    df = pd.read_csv(self.filepath)
+                    label_cols = [col for col in df.columns if col != self.smiles_colname]
+                    if len(label_cols) > 1 and self.label_colname in label_cols:
+                        print(f"Multi-label dataset detected. Loading from CSV to extract specific column: {self.label_colname}")
+                        data_list, has_labelled_data = self.__load_data_from_filepath()
+                        self.data_list = data_list
+                        return
+                except:
+                    pass
+            
             try:
                 print("Trying to load dataset from MoleculeNet")
                 self.data_list = list(MoleculeNet(self.root, self.name))
                 print("Dataset loaded from MoleculeNet")
+                
+                if self.label_colname is not None and len(self.data_list) > 0:
+                    first_data = self.data_list[0]
+                    if hasattr(first_data, 'y') and first_data.y is not None:
+                        if isinstance(first_data.y, torch.Tensor):
+                            y_shape = first_data.y.shape
+                            if len(y_shape) > 0 and (y_shape[0] > 1 if len(y_shape) == 1 else y_shape[-1] > 1):
+                                if self.filepath is not None and os.path.exists(self.filepath):
+                                    try:
+                                        df = pd.read_csv(self.filepath)
+                                        label_cols = [col for col in df.columns if col != self.smiles_colname]
+                                        if self.label_colname in label_cols:
+                                            label_idx = label_cols.index(self.label_colname)
+                                            for data in self.data_list:
+                                                if hasattr(data, 'y') and data.y is not None:
+                                                    if isinstance(data.y, torch.Tensor):
+                                                        if len(data.y.shape) == 1 and data.y.numel() > 1:
+                                                            if label_idx < data.y.numel():
+                                                                data.y = data.y[label_idx].clone().detach()
+                                                            else:
+                                                                print(f"Warning: Label index {label_idx} out of range for data.y with {data.y.numel()} elements")
+                                                        elif data.y.numel() == 1:
+                                                            pass
+                                    except Exception as e:
+                                        print(f"Warning: Could not extract specific label column from CSV: {e}")
             except:
                 print("Dataset not found in MoleculeNet")
                 dirpath = os.path.join(self.root, self.name, "processed")
