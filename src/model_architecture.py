@@ -91,7 +91,10 @@ class MoleculeNetClassifier(Module):
         self.dropout = Dropout(dropout_rate)
         
         # Output layer
-        self.out = Linear(hidden_dim * 2, num_classes)
+        if num_classes == 2:
+            self.out = Linear(hidden_dim * 2, 1)
+        else:
+            self.out = Linear(hidden_dim * 2, num_classes)
         self.num_classes = num_classes
     
     def forward(self, x, edge_index, batch):
