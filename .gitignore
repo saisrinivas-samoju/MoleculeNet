@@ -14,3 +14,4 @@ temp.**
 pyproject.toml
 hello.py
 uv.lock
+archive
