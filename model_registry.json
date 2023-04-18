@@ -3,7 +3,7 @@
         {
             "id": "esol_solubility",
             "name": "Solubility Predictor",
-            "model_file": "models/ESOL-made_gcn_full.pt",
+            "model_file": "models\\esol_esol_predicted_log_solubility_in_mols_per_litre_gcn_full.pt",
             "description": "Predicts aqueous solubility using graph neural networks trained on the ESOL dataset",
             "enabled": true,
             "properties": [
@@ -41,7 +41,7 @@
         {
             "id": "freesolvation",
             "name": "Solvation Energy Predictor",
-            "model_file": "models/FreeSolv-made_gcn_full.pt",
+            "model_file": "models\\freesolv_expt_gat_full.pt",
             "description": "Predicts hydration free energy using graph neural networks",
             "enabled": true,
             "properties": [
@@ -79,7 +79,7 @@
         {
             "id": "lipophilicity",
             "name": "Lipophilicity Predictor",
-            "model_file": "models/Lipo-made_gcn_full.pt",
+            "model_file": "models\\lipophilicity_exp_gat_full.pt",
             "description": "Predicts lipophilicity using graph neural networks",
             "enabled": true,
             "properties": [
@@ -174,6 +174,1094 @@
                             "color": "#4caf50"
                         }
                     ]
+                }
+            ]
+        },
+        {
+            "id": "hiv_hiv_active",
+            "name": "HIV Activity Predictor",
+            "model_file": "models\\hiv_hiv_active_gcn_full.pt",
+            "description": "Predicts HIV_active using graph neural networks trained on the HIV dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "hiv_active",
+                    "name": "HIV_active",
+                    "output_key": "predicted_hiv_active",
+                    "unit": "",
+                    "badge": "HIV",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "bbbp_p_np",
+            "name": "Blood-Brain Barrier Predictor",
+            "model_file": "models\\bbbp_p_np_gcn_full.pt",
+            "description": "Predicts p_np using graph neural networks trained on the BBBP dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "p_np",
+                    "name": "p_np",
+                    "output_key": "predicted_p_np",
+                    "unit": "",
+                    "badge": "BBBP",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "bace_class",
+            "name": "BACE Inhibitor Predictor",
+            "model_file": "models\\bace_class_gat_full.pt",
+            "description": "Predicts Class using graph neural networks trained on the BACE dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "class",
+                    "name": "Class",
+                    "output_key": "predicted_class",
+                    "unit": "",
+                    "badge": "BACE",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_hepatobiliary_disorders",
+            "name": "Hepatobiliary disorders Predictor",
+            "model_file": "models\\sider_hepatobiliary_disorders_gat_full.pt",
+            "description": "Predicts Hepatobiliary disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "hepatobiliary_disorders",
+                    "name": "Hepatobiliary disorders",
+                    "output_key": "predicted_hepatobiliary_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_metabolism_and_nutrition_disorders",
+            "name": "Metabolism & nutrition disorders Predictor",
+            "model_file": "models\\sider_metabolism_and_nutrition_disorders_gcn_full.pt",
+            "description": "Predicts Metabolism and nutrition disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "metabolism_and_nutrition_disorders",
+                    "name": "Metabolism and nutrition disorders",
+                    "output_key": "predicted_metabolism_and_nutrition_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_product_issues",
+            "name": "Product issues Predictor",
+            "model_file": "models\\sider_product_issues_gat_full.pt",
+            "description": "Predicts Product issues using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "product_issues",
+                    "name": "Product issues",
+                    "output_key": "predicted_product_issues",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_eye_disorders",
+            "name": "Eye disorders Predictor",
+            "model_file": "models\\sider_eye_disorders_gat_full.pt",
+            "description": "Predicts Eye disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "eye_disorders",
+                    "name": "Eye disorders",
+                    "output_key": "predicted_eye_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_investigations",
+            "name": "Investigations Predictor",
+            "model_file": "models\\sider_investigations_gat_full.pt",
+            "description": "Predicts Investigations using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "investigations",
+                    "name": "Investigations",
+                    "output_key": "predicted_investigations",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_musculoskeletal_and_connective_tissue_disorders",
+            "name": "Musculoskeletal & connective tissue disorders Predictor",
+            "model_file": "models\\sider_musculoskeletal_and_connective_tissue_disorders_gcn_full.pt",
+            "description": "Predicts Musculoskeletal and connective tissue disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "musculoskeletal_and_connective_tissue_disorders",
+                    "name": "Musculoskeletal and connective tissue disorders",
+                    "output_key": "predicted_musculoskeletal_and_connective_tissue_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_gastrointestinal_disorders",
+            "name": "Gastrointestinal disorders Predictor",
+            "model_file": "models\\sider_gastrointestinal_disorders_gcn_full.pt",
+            "description": "Predicts Gastrointestinal disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "gastrointestinal_disorders",
+                    "name": "Gastrointestinal disorders",
+                    "output_key": "predicted_gastrointestinal_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_social_circumstances",
+            "name": "Social circumstances Predictor",
+            "model_file": "models\\sider_social_circumstances_gcn_full.pt",
+            "description": "Predicts Social circumstances using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "social_circumstances",
+                    "name": "Social circumstances",
+                    "output_key": "predicted_social_circumstances",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_immune_system_disorders",
+            "name": "Immune system disorders Predictor",
+            "model_file": "models\\sider_immune_system_disorders_gcn_full.pt",
+            "description": "Predicts Immune system disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "immune_system_disorders",
+                    "name": "Immune system disorders",
+                    "output_key": "predicted_immune_system_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_reproductive_system_and_breast_disorders",
+            "name": "Reproductive system & breast disorders Predictor",
+            "model_file": "models\\sider_reproductive_system_and_breast_disorders_gat_full.pt",
+            "description": "Predicts Reproductive system and breast disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "reproductive_system_and_breast_disorders",
+                    "name": "Reproductive system and breast disorders",
+                    "output_key": "predicted_reproductive_system_and_breast_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_neoplasms_benign_malignant_and_unspecified_incl_cysts_and_polyps",
+            "name": "Neoplasms benign, malignant & unspecified (incl cysts & polyps) Predictor",
+            "model_file": "models\\sider_neoplasms_benign_malignant_and_unspecified_incl_cysts_and_polyps_gcn_full.pt",
+            "description": "Predicts Neoplasms benign, malignant and unspecified (incl cysts and polyps) using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "neoplasms_benign_malignant_and_unspecified_incl_cysts_and_polyps",
+                    "name": "Neoplasms benign, malignant and unspecified (incl cysts and polyps)",
+                    "output_key": "predicted_neoplasms_benign_malignant_and_unspecified_incl_cysts_and_polyps",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_general_disorders_and_administration_site_conditions",
+            "name": "General disorders & administration site conditions Predictor",
+            "model_file": "models\\sider_general_disorders_and_administration_site_conditions_gat_full.pt",
+            "description": "Predicts General disorders and administration site conditions using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "general_disorders_and_administration_site_conditions",
+                    "name": "General disorders and administration site conditions",
+                    "output_key": "predicted_general_disorders_and_administration_site_conditions",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_endocrine_disorders",
+            "name": "Endocrine disorders Predictor",
+            "model_file": "models\\sider_endocrine_disorders_gat_full.pt",
+            "description": "Predicts Endocrine disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "endocrine_disorders",
+                    "name": "Endocrine disorders",
+                    "output_key": "predicted_endocrine_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_surgical_and_medical_procedures",
+            "name": "Surgical & medical procedures Predictor",
+            "model_file": "models\\sider_surgical_and_medical_procedures_gcn_full.pt",
+            "description": "Predicts Surgical and medical procedures using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "surgical_and_medical_procedures",
+                    "name": "Surgical and medical procedures",
+                    "output_key": "predicted_surgical_and_medical_procedures",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_vascular_disorders",
+            "name": "Vascular disorders Predictor",
+            "model_file": "models\\sider_vascular_disorders_gat_full.pt",
+            "description": "Predicts Vascular disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "vascular_disorders",
+                    "name": "Vascular disorders",
+                    "output_key": "predicted_vascular_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_blood_and_lymphatic_system_disorders",
+            "name": "Blood & lymphatic system disorders Predictor",
+            "model_file": "models\\sider_blood_and_lymphatic_system_disorders_gat_full.pt",
+            "description": "Predicts Blood and lymphatic system disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "blood_and_lymphatic_system_disorders",
+                    "name": "Blood and lymphatic system disorders",
+                    "output_key": "predicted_blood_and_lymphatic_system_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_skin_and_subcutaneous_tissue_disorders",
+            "name": "Skin & subcutaneous tissue disorders Predictor",
+            "model_file": "models\\sider_skin_and_subcutaneous_tissue_disorders_gat_full.pt",
+            "description": "Predicts Skin and subcutaneous tissue disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "skin_and_subcutaneous_tissue_disorders",
+                    "name": "Skin and subcutaneous tissue disorders",
+                    "output_key": "predicted_skin_and_subcutaneous_tissue_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_congenital_familial_and_genetic_disorders",
+            "name": "Congenital, familial & genetic disorders Predictor",
+            "model_file": "models\\sider_congenital_familial_and_genetic_disorders_gat_full.pt",
+            "description": "Predicts Congenital, familial and genetic disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "congenital_familial_and_genetic_disorders",
+                    "name": "Congenital, familial and genetic disorders",
+                    "output_key": "predicted_congenital_familial_and_genetic_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_infections_and_infestations",
+            "name": "Infections & infestations Predictor",
+            "model_file": "models\\sider_infections_and_infestations_gcn_full.pt",
+            "description": "Predicts Infections and infestations using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "infections_and_infestations",
+                    "name": "Infections and infestations",
+                    "output_key": "predicted_infections_and_infestations",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_respiratory_thoracic_and_mediastinal_disorders",
+            "name": "Respiratory, thoracic & mediastinal disorders Predictor",
+            "model_file": "models\\sider_respiratory_thoracic_and_mediastinal_disorders_gat_full.pt",
+            "description": "Predicts Respiratory, thoracic and mediastinal disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "respiratory_thoracic_and_mediastinal_disorders",
+                    "name": "Respiratory, thoracic and mediastinal disorders",
+                    "output_key": "predicted_respiratory_thoracic_and_mediastinal_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_psychiatric_disorders",
+            "name": "Psychiatric disorders Predictor",
+            "model_file": "models\\sider_psychiatric_disorders_gcn_full.pt",
+            "description": "Predicts Psychiatric disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "psychiatric_disorders",
+                    "name": "Psychiatric disorders",
+                    "output_key": "predicted_psychiatric_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_renal_and_urinary_disorders",
+            "name": "Renal & urinary disorders Predictor",
+            "model_file": "models\\sider_renal_and_urinary_disorders_gat_full.pt",
+            "description": "Predicts Renal and urinary disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "renal_and_urinary_disorders",
+                    "name": "Renal and urinary disorders",
+                    "output_key": "predicted_renal_and_urinary_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_pregnancy_puerperium_and_perinatal_conditions",
+            "name": "Pregnancy, puerperium & perinatal conditions Predictor",
+            "model_file": "models\\sider_pregnancy_puerperium_and_perinatal_conditions_gat_full.pt",
+            "description": "Predicts Pregnancy, puerperium and perinatal conditions using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "pregnancy_puerperium_and_perinatal_conditions",
+                    "name": "Pregnancy, puerperium and perinatal conditions",
+                    "output_key": "predicted_pregnancy_puerperium_and_perinatal_conditions",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_ear_and_labyrinth_disorders",
+            "name": "Ear & labyrinth disorders Predictor",
+            "model_file": "models\\sider_ear_and_labyrinth_disorders_gat_full.pt",
+            "description": "Predicts Ear and labyrinth disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "ear_and_labyrinth_disorders",
+                    "name": "Ear and labyrinth disorders",
+                    "output_key": "predicted_ear_and_labyrinth_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_cardiac_disorders",
+            "name": "Cardiac disorders Predictor",
+            "model_file": "models\\sider_cardiac_disorders_gat_full.pt",
+            "description": "Predicts Cardiac disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "cardiac_disorders",
+                    "name": "Cardiac disorders",
+                    "output_key": "predicted_cardiac_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_nervous_system_disorders",
+            "name": "Nervous system disorders Predictor",
+            "model_file": "models\\sider_nervous_system_disorders_gat_full.pt",
+            "description": "Predicts Nervous system disorders using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "nervous_system_disorders",
+                    "name": "Nervous system disorders",
+                    "output_key": "predicted_nervous_system_disorders",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "sider_injury_poisoning_and_procedural_complications",
+            "name": "Injury, poisoning & procedural complications Predictor",
+            "model_file": "models\\sider_injury_poisoning_and_procedural_complications_gat_full.pt",
+            "description": "Predicts Injury, poisoning and procedural complications using graph neural networks trained on the SIDER dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "injury_poisoning_and_procedural_complications",
+                    "name": "Injury, poisoning and procedural complications",
+                    "output_key": "predicted_injury_poisoning_and_procedural_complications",
+                    "unit": "",
+                    "badge": "SIDER",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "clintox_fda_approved",
+            "name": "FDA Approval Predictor",
+            "model_file": "models\\clintox_fda_approved_gat_full.pt",
+            "description": "Predicts FDA_APPROVED using graph neural networks trained on the ClinTox dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "fda_approved",
+                    "name": "FDA_APPROVED",
+                    "output_key": "predicted_fda_approved",
+                    "unit": "",
+                    "badge": "ClinTox",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
+                }
+            ]
+        },
+        {
+            "id": "clintox_ct_tox",
+            "name": "CT_TOX Predictor",
+            "model_file": "models\\clintox_ct_tox_gat_full.pt",
+            "description": "Predicts CT_TOX using graph neural networks trained on the ClinTox dataset",
+            "enabled": true,
+            "properties": [
+                {
+                    "id": "ct_tox",
+                    "name": "CT_TOX",
+                    "output_key": "predicted_ct_tox",
+                    "unit": "",
+                    "badge": "ClinTox",
+                    "interpretations": [
+                        {
+                            "threshold": 0.7,
+                            "text": "High probability",
+                            "color": "#f44336"
+                        },
+                        {
+                            "threshold": 0.3,
+                            "text": "Moderate probability",
+                            "color": "#ff9800"
+                        },
+                        {
+                            "threshold": -999,
+                            "text": "Low probability",
+                            "color": "#4caf50"
+                        }
+                    ],
+                    "is_binary": true
                 }
             ]
         }
