@@ -299,6 +299,23 @@ a:hover {
     .header h1 {
         font-size: var(--fs-2);
     }
+    
+    .molecule-info-columns {
+        flex-direction: column;
+    }
+    
+    .molecule-info-column {
+        width: 100%;
+    }
+    
+    .molecule-3d-container {
+        min-height: 300px;
+    }
+    
+    .molecule-3d-container > div {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
 }
 
 /* Property Selector */
@@ -491,6 +508,33 @@ a:hover {
     flex: 1;
     min-width: 250px;
 }
+
+/* 3D visualization container */
+.molecule-3d-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+    padding: 15px;
+    min-height: 350px;
+    width: 100%;
+}
+
+.molecule-3d-loading {
+    color: var(--text);
+    font-size: var(--fs-5);
+    text-align: center;
+}
+
+.molecule-3d-error {
+    color: var(--text);
+    font-size: var(--fs-6);
+    text-align: center;
+    opacity: 0.7;
+}
+
 
 /* Molecule structure styles */
 .molecule-structure-container {

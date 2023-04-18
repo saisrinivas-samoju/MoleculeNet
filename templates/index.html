@@ -21,7 +21,7 @@
         <div class="container">
             <div class="card" id="input-card">
                 <h2 class="card-title">Enter Molecule Details</h2>
-                <p>Enter a SMILES string or compound name to predict properties</p>
+                <p>Enter a SMILES string or compound name to predict it's properties</p>
                 
                 <div class="property-selector">
                     <label for="property-select">Properties to Predict:</label>
@@ -52,7 +52,8 @@
                             required
                         >
                         <div class="input-info">
-                            We'll automatically detect if you've entered a SMILES string or compound name
+                            <!-- We'll automatically detect if you've entered a SMILES string or compound name -->
+                            Your input will be automatically classified as either a SMILES string or a compound name.
                         </div>
                     </div>
                     <button type="submit" class="btn btn-block">Predict</button>

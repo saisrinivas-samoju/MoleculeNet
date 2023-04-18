@@ -245,21 +245,75 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Update molecule details section
-    function updateMoleculeDetails(input, inputType, resolvedSmiles) {
+    async function updateMoleculeDetails(input, inputType, resolvedSmiles) {
+        // Create two-column layout for desktop (info on left, visualization on right)
+        // On mobile, visualization will appear below due to flex-wrap
         moleculeDetails.innerHTML = `
-            <div class="molecule-details-row">
-                <div class="molecule-details-label">Input:</div>
-                <div class="molecule-details-value">${input}</div>
-            </div>
-            <div class="molecule-details-row">
-                <div class="molecule-details-label">Input Type:</div>
-                <div class="molecule-details-value">${inputType}</div>
-            </div>
-            <div class="molecule-details-row">
-                <div class="molecule-details-label">SMILES:</div>
-                <div class="molecule-details-value">${resolvedSmiles}</div>
+            <div class="molecule-info-columns">
+                <div class="molecule-info-column">
+                    <div class="molecule-details-row">
+                        <div class="molecule-details-label">Input:</div>
+                        <div class="molecule-details-value">${input}</div>
+                    </div>
+                    <div class="molecule-details-row">
+                        <div class="molecule-details-label">Input Type:</div>
+                        <div class="molecule-details-value">${inputType}</div>
+                    </div>
+                    <div class="molecule-details-row">
+                        <div class="molecule-details-label">SMILES:</div>
+                        <div class="molecule-details-value">${resolvedSmiles}</div>
+                    </div>
+                </div>
+                <div class="molecule-info-column">
+                    <div class="molecule-3d-container">
+                        <div class="molecule-3d-loading">Loading 3D visualization...</div>
+                    </div>
+                </div>
             </div>
         `;
+        
+        // Load 3D visualization
+        try {
+            const vizResponse = await fetch(`${API_PREFIX}/visualize-3d?smiles=${encodeURIComponent(resolvedSmiles)}`);
+            if (vizResponse.ok) {
+                const vizData = await vizResponse.json();
+                const vizContainer = moleculeDetails.querySelector('.molecule-3d-container');
+                if (vizContainer) {
+                    // Use insertAdjacentHTML to ensure scripts execute
+                    vizContainer.innerHTML = '';
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = vizData.html;
+                    
+                    // Move all nodes (including script tags) to the container
+                    while (tempDiv.firstChild) {
+                        vizContainer.appendChild(tempDiv.firstChild);
+                    }
+                    
+                    // Execute any script tags manually (for browsers that don't auto-execute)
+                    const scripts = vizContainer.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => {
+                            newScript.setAttribute(attr.name, attr.value);
+                        });
+                        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                        oldScript.parentNode.replaceChild(newScript, oldScript);
+                    });
+                }
+            } else {
+                // If visualization fails, just remove the loading message
+                const vizContainer = moleculeDetails.querySelector('.molecule-3d-container');
+                if (vizContainer) {
+                    vizContainer.innerHTML = '<div class="molecule-3d-error">3D visualization unavailable</div>';
+                }
+            }
+        } catch (error) {
+            console.error("Error loading 3D visualization:", error);
+            const vizContainer = moleculeDetails.querySelector('.molecule-3d-container');
+            if (vizContainer) {
+                vizContainer.innerHTML = '<div class="molecule-3d-error">3D visualization unavailable</div>';
+            }
+        }
     }
     
     // Interpret a predicted value based on property configuration
