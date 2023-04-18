@@ -1,0 +1,16 @@
+cirpy>=1.0.2
+deepchem>=2.8.0
+fastapi>=0.120.4
+mango>=0.2.3
+mkdocs-material>=9.6.22
+mlflow>=3.1.4
+nbformat>=5.10.4
+pandas>=2.3.3
+plotly>=6.3.1
+py3dmol>=2.5.3
+pygwalker>=0.4.9.15
+rdkit>=2025.9.1
+seaborn>=0.13.2
+torch>=2.8.0
+torch-geometric>=2.6.1
+uvicorn>=0.38.0
