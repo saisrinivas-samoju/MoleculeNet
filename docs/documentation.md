@@ -1,10 +1,10 @@
 # Project Documentation
 
-This documentation provides detailed information about the Molecular Property Prediction framework components and how to use them.
+Here's how to use the different parts of this molecular property prediction system.
 
 ## Data Loading
 
-The data loading component is responsible for importing molecular data from various sources, particularly CSV files containing SMILES strings and molecular properties.
+Load molecular data from CSV files. The system expects SMILES strings and property values.
 
 === "Basic Usage"
     ```python
@@ -23,7 +23,7 @@ The data loading component is responsible for importing molecular data from vari
     ```
 
 === "Available Datasets"
-    The framework supports several built-in datasets:
+    Here are the datasets you can use:
     
     | Dataset | Property | Type | Size |
     | ------- | -------- | ---- | ---- |
@@ -36,16 +36,16 @@ The data loading component is responsible for importing molecular data from vari
     | SIDER | Side Effect | Classification | 1,427 |
     | ClinTox | Clinical Toxicity | Classification | 1,478 |
 
-The `MoleculeDataset` class handles:
+The `MoleculeDataset` class does a few things:
 
-- Loading molecule data from CSV files
-- Storing SMILES strings and associated property values
-- Converting molecules to PyTorch Geometric Data objects
-- Providing standard dataset functionality (indexing, length, etc.)
+- Loads molecule data from CSV files
+- Stores SMILES strings and their property values
+- Converts molecules into PyTorch Geometric Data objects
+- Lets you access molecules by index and check how many you have
 
 ## Data Preprocessing
 
-The preprocessing component transforms raw molecular data into a format suitable for graph neural networks.
+This turns raw molecular data into graphs that neural networks can work with.
 
 === "Preprocessing Steps"
     ```python
@@ -59,22 +59,22 @@ The preprocessing component transforms raw molecular data into a format suitable
     ```
 
 === "Feature Engineering"
-    The preprocessor extracts comprehensive molecular features:
+    The preprocessor pulls out different features:
     
-    - **Atom Features**: Atomic number, chirality, hybridization, aromaticity, etc.
-    - **Bond Features**: Bond type, conjugation, ring status, etc.
-    - **Molecular Graphs**: Nodes (atoms) and edges (bonds) with associated features
+    - **Atom Features**: What element it is, chirality, hybridization, whether it's in a ring, etc.
+    - **Bond Features**: Single, double, triple bonds, conjugation, ring membership
+    - **Molecular Graphs**: Nodes are atoms, edges are bonds, all with their features attached
 
 The preprocessing pipeline:
 
-1. Takes the raw SMILES strings
+1. Takes SMILES strings
 2. Converts them to molecular graphs
-3. Extracts relevant features for each atom and bond
+3. Extracts features for each atom and bond
 4. Creates PyTorch Geometric Data objects
 
 ## Data Splitting
 
-The data splitting component handles division of datasets into training, validation, and test sets.
+Split your data into training, validation, and test sets.
 
 === "Basic Splitting"
     ```python
@@ -93,23 +93,23 @@ The data splitting component handles division of datasets into training, validat
     ```
 
 === "Available Strategies"
-    The framework supports multiple splitting strategies:
+    You can use different ways to split:
     
     - **ShuffleSplit**: Random splitting (default)
     - **ScaffoldSplit**: Split based on molecular scaffolds
-    - **TemporalSplit**: Split based on temporal information (if available)
+    - **TemporalSplit**: Split based on time if your data has that info
 
-The data splitter ensures:
+The data splitter makes sure:
 
-- Proper distribution of data across training, validation, and test sets
-- Consistent batch sizes for efficient training
-- Reproducibility through random seed setting
+- Data gets distributed properly across train, val, and test
+- Batch sizes stay consistent for training
+- You can reproduce splits with a random seed
 
 ## Model Architecture
 
-The model architecture component provides neural network models specialized for molecular property prediction.
+You can use regression or classification models depending on what you're trying to predict.
 
-=== "Model Initialization"
+=== "Regression Model"
     ```python
     from src.model_architecture import MoleculeNetRegressor
     import torch
@@ -125,23 +125,39 @@ The model architecture component provides neural network models specialized for 
     model = model.to(device)
     ```
 
+=== "Classification Model"
+    ```python
+    from src.model_architecture import MoleculeNetClassifier
+    import torch
+    
+    # Initialize model
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = MoleculeNetClassifier(
+        num_features=dataset[0].num_features,
+        hidden_dim=64,
+        layer_type='gcn',
+        dropout_rate=0.2,
+        num_classes=2  # Binary classification
+    )
+    model = model.to(device)
+    ```
+
 === "Available Architectures"
-    The framework supports several types of graph neural networks:
+    You can use different graph neural network types:
     
     - **GCN**: Graph Convolutional Network (default)
     - **GAT**: Graph Attention Network
     - **GraphSAGE**: Graph SAmple and aggreGatE
 
-The `MoleculeNetRegressor` class:
+The model classes:
 
-- Implements a graph neural network for molecular property prediction
-- Processes molecular graphs as input
-- Supports different types of graph layer architectures
-- Produces property predictions as output
+- Take molecular graphs as input
+- Process them through graph layers
+- Output predictions (numbers for regression, class labels for classification)
 
 ## Model Training
 
-The training component handles the process of training models on molecular data.
+Train your models with early stopping and learning rate scheduling built in.
 
 === "Basic Training"
     ```python
@@ -155,11 +171,12 @@ The training component handles the process of training models on molecular data.
         device=device,
         learning_rate=0.001,
         num_epochs=100,
-        patience=10
+        patience=10,
+        task_type='regression'
     )
     
     # Plot training progress
-    plot_training_history(history)
+    plot_training_history(history, task_type='regression')
     
     print(f"Best validation metrics: RMSE={best_metrics['RMSE']:.4f}, R²={best_metrics['R2']:.4f}")
     ```
@@ -178,20 +195,21 @@ The training component handles the process of training models on molecular data.
         patience=10,
         scheduler_factor=0.5,  # Learning rate reduction factor
         scheduler_patience=5,  # Epochs before reducing learning rate
-        verbose=True  # Print progress
+        verbose=True,  # Print progress
+        task_type='regression'
     )
     ```
 
-The training module provides:
+The training module gives you:
 
-- Automatic early stopping to prevent overfitting
-- Learning rate scheduling for better convergence
-- Comprehensive training history tracking
-- Visualization of training progress
+- Early stopping so you don't overfit
+- Learning rate scheduling to help convergence
+- Training history so you can see what happened
+- Plots of training progress
 
 ## Model Evaluation
 
-The evaluation component assesses model performance on test data.
+See how well your model performs on test data.
 
 === "Basic Evaluation"
     ```python
@@ -199,7 +217,9 @@ The evaluation component assesses model performance on test data.
     import matplotlib.pyplot as plt
     
     # Evaluate on test data
-    test_metrics, test_predictions, test_actual = evaluate_model(model, test_loader, device)
+    test_metrics, test_predictions, test_actual = evaluate_model(
+        model, test_loader, device, task_type='regression'
+    )
     
     # Print metrics
     print("Test metrics:")
@@ -217,14 +237,14 @@ The evaluation component assesses model performance on test data.
     plt.show()
     ```
 
-The evaluation module calculates various metrics:
+The evaluation module calculates:
 
 - **For Regression**: RMSE, MAE, R², Pearson correlation
 - **For Classification**: Accuracy, precision, recall, F1-score, ROC-AUC
 
 ## Model Saving and Loading
 
-The model utilities component allows saving and loading trained models.
+Save trained models so you can use them later or deploy them.
 
 === "Saving a Model"
     ```python
@@ -240,6 +260,7 @@ The model utilities component allows saving and loading trained models.
         'hidden_dim': 64,
         'layer_type': 'gcn',
         'dataset': 'ESOL',
+        'target_column': 'ESOL predicted log solubility in mols per litre',
         'task_type': 'regression'
     }
     
@@ -259,21 +280,24 @@ The model utilities component allows saving and loading trained models.
     from src.model_utils import load_model
     
     # Load the model
-    loaded_model, loaded_info, loaded_metrics = load_model('models/esol_gcn_full.pt', device)
+    loaded_model, loaded_info, loaded_metrics = load_model(
+        'models/esol_gcn_full.pt', device, task_type='regression'
+    )
     
     print(f"Loaded model info: {loaded_info}")
     print(f"Loaded model metrics: {loaded_metrics}")
     ```
 
-The model utilities provide:
+The model utilities let you:
 
-- Comprehensive model saving with metadata
-- Convenient loading for later use or deployment
-- Storage of model architecture, weights, and performance metrics
+- Save models with all their metadata
+- Load models back easily
+- Store model architecture, weights, and performance metrics together
+- Seperate model files from their configuration
 
 ## Making Predictions
 
-The prediction component allows making predictions for new molecules.
+Make predictions for new molecules using SMILES strings.
 
 === "Single Molecule Prediction"
     ```python
@@ -281,9 +305,14 @@ The prediction component allows making predictions for new molecules.
     
     # Predict property for a single molecule using SMILES
     smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"  # Aspirin
-    prediction = predict_molecule(model, smiles, device)
     
+    # For regression
+    prediction = predict_molecule(model, smiles, device, task_type='regression')
     print(f"Predicted solubility: {prediction:.4f} log(mol/L)")
+    
+    # For classification
+    class_label, class_prob = predict_molecule(model, smiles, device, task_type='classification')
+    print(f"Predicted class: {class_label} with probability {class_prob:.4f}")
     ```
 
 === "Multiple Molecule Predictions"
@@ -299,7 +328,11 @@ The prediction component allows making predictions for new molecules.
     ]
     
     # Predict properties for multiple molecules
-    predictions, _ = predict_molecules(model, smiles_list, device)
+    # For regression
+    predictions, _ = predict_molecules(model, smiles_list, device, task_type='regression')
+    
+    # For classification
+    predictions, probabilities, _ = predict_molecules(model, smiles_list, device, task_type='classification')
     
     # Create results dataframe
     results = pd.DataFrame({
@@ -310,8 +343,73 @@ The prediction component allows making predictions for new molecules.
     print(results)
     ```
 
-The prediction module offers:
+The prediction module lets you:
 
-- Direct prediction from SMILES strings
-- Batch predictions for multiple molecules
-- Support for both raw SMILES and preprocessed molecular graphs 
+- Predict from SMILES strings directly
+- Handle batches of molecules
+- Work with both regression and classification models
+
+## Web Interface
+
+There's a web interface you can use to make predictions without writing code.
+
+=== "Starting the Server"
+    ```bash
+    # Start the FastAPI server
+    uvicorn app:app --reload
+    
+    # The web interface will be at http://localhost:8000
+    ```
+
+=== "Using the API"
+    ```python
+    import requests
+    
+    # Make a prediction via API
+    response = requests.post(
+        'http://localhost:8000/molecule-net/predict',
+        json={
+            'query': 'aspirin',  # Can be SMILES or compound name
+            'model_ids': ['esol_solubility']  # Optional, uses all models if not specified
+        }
+    )
+    
+    result = response.json()
+    print(result)
+    ```
+
+The web interface provides:
+
+- A browser based UI for making predictions
+- Support for SMILES strings or compound names (resolves names to SMILES)
+- 3D molecular visualization
+- Model registry to manage multiple trained models
+- API endpoints for programmatic access
+
+## Model Registry
+
+The model registry keeps track of all your trained models and makes them available through the web interface.
+
+=== "Model Registry Structure"
+    The `model_registry.json` file contains information about each model:
+    
+    - Model ID and name
+    - File path to the saved model
+    - Dataset and task type
+    - UI configuration for the web interface
+    - Property definitions and interpretations
+
+=== "Updating the Registry"
+    ```python
+    from src.helper import update_model_registry
+    
+    # After training a model, update the registry
+    update_model_registry()
+    ```
+
+The model registry:
+
+- Tracks all available models in one place
+- Configures how models appear in the web interface
+- Defines what properties each model predicts
+- Groups models by category for easier selection
